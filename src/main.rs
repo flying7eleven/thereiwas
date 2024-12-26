@@ -1,1 +1,25 @@
-fn main() {}
+use chrono::Utc;
+use log::LevelFilter;
+
+fn setup_logging(logging_level: LevelFilter) {
+    let mut base_config = fern::Dispatch::new();
+
+    base_config = base_config.level(logging_level);
+
+    let logging_target = fern::Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "{}[{}][{}] {}",
+                Utc::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        .chain(std::io::stderr());
+
+    base_config.chain(logging_target).apply().unwrap();
+}
+fn main() {
+    setup_logging(LevelFilter::Trace);
+}
