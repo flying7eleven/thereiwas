@@ -1,7 +1,7 @@
 use chrono::Utc;
-use log::LevelFilter;
+use log::{debug, error, info, trace, warn, LevelFilter};
 
-fn setup_logging(logging_level: LevelFilter) {
+async fn setup_logging(logging_level: LevelFilter) {
     let mut base_config = fern::Dispatch::new();
 
     base_config = base_config.level(logging_level);
@@ -20,6 +20,13 @@ fn setup_logging(logging_level: LevelFilter) {
 
     base_config.chain(logging_target).apply().unwrap();
 }
-fn main() {
-    setup_logging(LevelFilter::Trace);
+#[rocket::main]
+async fn main() {
+    setup_logging(LevelFilter::Trace).await;
+
+    trace!("Some trace message");
+    debug!("Some debug message");
+    info!("Some info message");
+    warn!("Some warn message");
+    error!("Some error message");
 }

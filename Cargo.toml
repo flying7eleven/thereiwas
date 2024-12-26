@@ -29,3 +29,8 @@ default-features = false
 version = "0.4.22"
 default-features = false
 features = ["std"]
+
+[dependencies.rocket]
+version = "0.5.1"
+default-features = false
+features = ["json"]
