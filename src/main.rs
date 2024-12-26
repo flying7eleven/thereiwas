@@ -1,6 +1,9 @@
 use chrono::Utc;
 use log::{debug, error, info, trace, warn, LevelFilter};
 
+mod models;
+mod schema;
+
 async fn setup_logging(logging_level: LevelFilter) {
     let mut base_config = fern::Dispatch::new();
 
