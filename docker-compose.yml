@@ -1,9 +1,9 @@
 services:
-  there_i_was_database:
-    container_name: there_i_was_database
+  thereiwas_database:
+    container_name: thereiwas_database
     image: postgres:17-alpine
     volumes:
-      - ./volumes/there_i_was_database:/var/lib/postgresql/data:rw
+      - ./volumes/thereiwas_database:/var/lib/postgresql/data:rw
     environment:
       - POSTGRES_USER=thereiwas
       - POSTGRES_PASSWORD=debugpassword

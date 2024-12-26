@@ -1,12 +1,12 @@
 [package]
-name = "there-i-was"
+name = "thereiwas"
 version = "2024.12.25"
 edition = "2021"
 authors = ["Tim Janke <tim+github@janke.biz>"]
 description = "Self-hosted, privacy-focused way to track and visualize your location history over the years"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/flying7eleven/there-i-was"
+repository = "https://github.com/flying7eleven/thereiwas"
 exclude = [".github/", ".gitignore"]
 publish = false
 rust-version = "1.81"

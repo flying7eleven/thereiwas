@@ -1327,7 +1327,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "there-i-was"
+name = "thereiwas"
 version = "2024.12.25"
 dependencies = [
  "chrono",
