@@ -21,6 +21,10 @@ version = "2.2.6"
 default-features = false
 features = ["postgres", "r2d2", "chrono"]
 
+[dependencies.dotenv]
+version = "0.15.0"
+default-features = false
+
 [dependencies.fern]
 version = "0.7.1"
 default-features = false

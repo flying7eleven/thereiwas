@@ -25,6 +25,8 @@ async fn setup_logging(logging_level: LevelFilter) {
 }
 #[rocket::main]
 async fn main() {
+    dotenv::dotenv().ok();
+
     setup_logging(LevelFilter::Trace).await;
 
     trace!("Some trace message");
