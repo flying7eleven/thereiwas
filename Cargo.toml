@@ -10,3 +10,8 @@ repository = "https://github.com/flying7eleven/there-i-was"
 exclude = [".github/", ".gitignore"]
 publish = false
 rust-version = "1.81"
+
+[dependencies.diesel]
+version = "2.2.6"
+default-features = false
+features = ["postgres", "r2d2", "chrono"]
