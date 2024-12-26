@@ -1,0 +1,31 @@
+name: Build
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: [ main ]
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - run: sudo apt-get install -y libpq-dev
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }} && rustup component add rustfmt
+      - run: cargo build --verbose
+        working-directory: .
+      - run: cargo fmt --all -- --check
+        working-directory: .
+      - run: cargo test --verbose
+        working-directory: .
