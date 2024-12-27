@@ -21,6 +21,10 @@ version = "2.2.6"
 default-features = false
 features = ["postgres", "r2d2", "chrono"]
 
+[dependencies.diesel_migrations]
+version = "2.2.0"
+default-features = false
+
 [dependencies.dotenv]
 version = "0.15.0"
 default-features = false
