@@ -11,5 +11,5 @@ CREATE TABLE locations
     vertical_accuracy   INT        DEFAULT NULL,
     barometric_pressure FLOAT      DEFAULT NULL,
     topic               VARCHAR(200) NOT NULL,
-    created_at          TIMESTAMP    NOT NULL
+    created_at          TIMESTAMP  DEFAULT NULL
 );

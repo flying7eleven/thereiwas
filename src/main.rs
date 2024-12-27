@@ -1,4 +1,5 @@
 use crate::fairings::ThereIWasDatabaseConnection;
+use crate::routes::add_new_location_record;
 use chrono::Utc;
 use diesel::PgConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -13,6 +14,7 @@ use std::time::Duration;
 
 mod fairings;
 mod models;
+mod routes;
 mod schema;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
@@ -110,7 +112,7 @@ async fn main() {
     info!("Database preparations done and starting up the API endpoints now...");
     let _ = rocket::custom(rocket_configuration_figment)
         .manage(ThereIWasDatabaseConnection::from(db_connection_pool))
-        .mount("/", routes![])
+        .mount("/", routes![add_new_location_record])
         .launch()
         .await;
 }

@@ -1376,6 +1376,7 @@ dependencies = [
  "log",
  "r2d2",
  "rocket",
+ "serde",
 ]
 
 [[package]]
