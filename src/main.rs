@@ -4,6 +4,7 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use log::{debug, error, info, trace, warn, LevelFilter};
 use std::time::Duration;
 
+mod fairings;
 mod models;
 mod schema;
 
