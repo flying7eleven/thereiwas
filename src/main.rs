@@ -1,7 +1,14 @@
+use crate::fairings::ThereIWasDatabaseConnection;
 use chrono::Utc;
 use diesel::PgConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use log::{debug, error, info, trace, warn, LevelFilter};
+use log::{debug, error, info, LevelFilter};
+use rocket::config::{Shutdown, Sig};
+use rocket::figment::{
+    util::map,
+    value::{Map, Value},
+};
+use rocket::{routes, Config as RocketConfig};
 use std::time::Duration;
 
 mod fairings;
@@ -74,4 +81,36 @@ async fn main() {
     });
     run_migrations(&mut db_connection);
     info!("Database preparations finished");
+
+    let thereiwas_database_config: Map<_, Value> = map! {
+        "url" => database_connection_url.into(),
+        "pool_size" => 25.into()
+    };
+
+    let rocket_configuration_figment = RocketConfig::figment()
+        .merge(("databases", map!["thereiwas" => thereiwas_database_config]))
+        .merge(("port", 3000))
+        .merge(("address", std::net::Ipv4Addr::new(0, 0, 0, 0)))
+        .merge((
+            "shutdown",
+            Shutdown {
+                ctrlc: true,
+                signals: {
+                    let mut set = std::collections::HashSet::new();
+                    set.insert(Sig::Term);
+                    set
+                },
+                grace: 2,
+                mercy: 3,
+                force: true,
+                __non_exhaustive: (),
+            },
+        ));
+
+    info!("Database preparations done and starting up the API endpoints now...");
+    let _ = rocket::custom(rocket_configuration_figment)
+        .manage(ThereIWasDatabaseConnection::from(db_connection_pool))
+        .mount("/", routes![])
+        .launch()
+        .await;
 }
