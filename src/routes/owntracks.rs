@@ -2,6 +2,8 @@ use crate::fairings::ThereIWasDatabaseConnection;
 use crate::models::NewLocation;
 use crate::schema;
 use chrono::DateTime;
+use diesel::result::DatabaseErrorKind;
+use diesel::result::Error::DatabaseError;
 use diesel::RunQueryDsl;
 use log::error;
 use rocket::http::Status;
@@ -56,9 +58,22 @@ pub fn add_new_location_record(
         .values(&new_record)
         .execute(&mut db_connection);
 
-    if let Err(error) = query_result {
-        error!("Could not store location data. The error was: {}", error);
+    if let Err(DatabaseError(error_kind, error_info)) = query_result {
+        if let DatabaseErrorKind::UniqueViolation = error_kind {
+            error!("Could not store the location request since the location point was already submitted");
+            return Status::Conflict;
+        }
+        error!("There was an error reported by the database ({:?}) while storing a location request. The error was {}", error_kind, error_info.message());
         return Status::InternalServerError;
     }
+
+    if let Err(error) = query_result {
+        error!(
+            "There was an error while trying to store a location request. The error was: {}",
+            error
+        );
+        return Status::InternalServerError;
+    }
+
     Status::NoContent
 }
