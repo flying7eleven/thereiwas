@@ -1,5 +1,3 @@
-use crate::fairings::ThereIWasDatabaseConnection;
-use crate::routes::add_new_location_record;
 use chrono::Utc;
 use diesel::PgConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -11,11 +9,8 @@ use rocket::figment::{
 };
 use rocket::{routes, Config as RocketConfig};
 use std::time::Duration;
-
-mod fairings;
-mod models;
-mod routes;
-mod schema;
+use thereiwas::fairings::ThereIWasDatabaseConnection;
+use thereiwas::routes::owntracks::add_new_location_record;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
