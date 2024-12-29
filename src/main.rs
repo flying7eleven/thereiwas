@@ -56,13 +56,17 @@ async fn setup_logging(logging_level: LevelFilter) {
         })
         .chain(std::io::stderr());
 
-    base_config.chain(logging_target).apply().unwrap();
+    base_config
+        .chain(logging_target)
+        .level_for("rocket", LevelFilter::Error)
+        .apply()
+        .unwrap();
 }
 #[rocket::main]
 async fn main() {
     dotenv::dotenv().ok();
 
-    setup_logging(LevelFilter::Trace).await;
+    setup_logging(LevelFilter::Debug).await;
 
     let database_connection_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_connection_pool_manager = diesel::r2d2::ConnectionManager::new(&database_connection_url);
