@@ -33,6 +33,8 @@ RUN adduser \
     --uid 10001 \
     "thereiwas"
 
+RUN apt update && apt install -y libpq5
+
 USER thereiwas:thereiwas
 
 # COPY --from=cargo-build --chown=thereiwas:thereiwas /usr/src/app/target/x86_64-unknown-linux-musl/release/thereiwas /usr/local/bin/thereiwas
