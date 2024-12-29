@@ -12,22 +12,28 @@ use rocket::{post, State};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct NewLocationRequest {
-    pub batt: Option<i32>,
+struct NewLocationRequest {
     pub lon: f64,
+    pub lat: f64,
+    pub m: i32,
+    pub tst: i64,
+    pub bs: Option<u8>,
+    pub batt: Option<u8>,
     pub acc: Option<i32>,
     pub p: Option<f64>,
     pub vac: Option<i32>,
-    pub lat: f64,
     pub t: Option<String>,
     pub topic: Option<String>,
-    pub m: i32,
-    pub tst: i64,
     pub alt: Option<i32>,
     pub vel: Option<i32>,
     pub cog: Option<i32>,
     pub tid: String,
     pub _type: String,
+    #[serde(rename = "BSSID")]
+    pub bssid: Option<String>,
+    #[serde(rename = "SSID")]
+    pub ssid: Option<String>,
+    pub conn: Option<String>,
     pub created_at: Option<i64>,
 }
 
