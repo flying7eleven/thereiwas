@@ -51,3 +51,8 @@ features = ["json"]
 version = "1.0.216"
 default-features = false
 features = ["std"]
+
+[dependencies.serde_json]
+version = "1.0.134"
+default-features = false
+features = ["std"]

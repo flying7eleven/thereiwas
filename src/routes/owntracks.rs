@@ -1,5 +1,6 @@
 use crate::fairings::ThereIWasDatabaseConnection;
 use crate::models::NewLocation;
+use crate::routes::guards::RawBody;
 use crate::schema;
 use chrono::DateTime;
 use diesel::result::DatabaseErrorKind;
@@ -7,7 +8,6 @@ use diesel::result::Error::DatabaseError;
 use diesel::RunQueryDsl;
 use log::error;
 use rocket::http::Status;
-use rocket::serde::json::Json;
 use rocket::{post, State};
 use serde::{Deserialize, Serialize};
 
@@ -31,11 +31,23 @@ pub struct NewLocationRequest {
     pub created_at: Option<i64>,
 }
 
-#[post("/owntracks", data = "<new_location>")]
+#[post("/owntracks", data = "<raw_body>")]
 pub fn add_new_location_record(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
-    new_location: Json<NewLocationRequest>,
+    raw_body: RawBody,
 ) -> Status {
+    let new_location = match serde_json::from_slice::<NewLocationRequest>(&raw_body.0) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            let body_str = String::from_utf8_lossy(&raw_body.0);
+            error!(
+                "Received unknown or invalid JSON received (error was {}): {}",
+                e, body_str
+            );
+            return Status::UnprocessableEntity;
+        }
+    };
+
     let new_record = NewLocation {
         horizontal_accuracy: new_location.acc,
         altitude: new_location.alt,
