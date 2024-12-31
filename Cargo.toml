@@ -1,6 +1,6 @@
 [package]
 name = "thereiwas"
-version = "2024.12.29"
+version = "2024.12.31"
 edition = "2021"
 authors = ["Tim Janke <tim+github@janke.biz>"]
 description = "Self-hosted, privacy-focused way to track and visualize your location history over the years"
