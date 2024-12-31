@@ -7,7 +7,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
 use diesel::result::Error::DatabaseError;
 use diesel::{PgConnection, RunQueryDsl};
-use log::error;
+use log::{error, trace};
 use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::{post, State};
@@ -102,6 +102,7 @@ fn handle_new_location_request(
         return Status::InternalServerError;
     }
 
+    trace!("Location request stored successfully");
     Status::NoContent
 }
 
@@ -121,6 +122,10 @@ pub fn add_new_location_record(
             return Status::UnprocessableEntity;
         }
     };
+    trace!(
+        "Received a new location request with the tid of {}",
+        new_location.tid
+    );
 
     let mut db_connection = db_connection_pool.get().unwrap();
 
