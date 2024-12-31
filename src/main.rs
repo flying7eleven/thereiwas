@@ -39,7 +39,7 @@ pub fn run_migrations(connection: &mut PgConnection) {
     }
 }
 
-async fn setup_logging(logging_level: LevelFilter) {
+async fn setup_logging(logging_level: LevelFilter, logfile_path: &String) {
     let mut base_config = fern::Dispatch::new();
 
     base_config = base_config.level(logging_level);
@@ -54,7 +54,8 @@ async fn setup_logging(logging_level: LevelFilter) {
                 message
             ))
         })
-        .chain(std::io::stderr());
+        .chain(std::io::stderr())
+        .chain(fern::log_file(logfile_path).unwrap());
 
     base_config
         .chain(logging_target)
@@ -62,11 +63,29 @@ async fn setup_logging(logging_level: LevelFilter) {
         .apply()
         .unwrap();
 }
+
+async fn get_logging_level() -> LevelFilter {
+    match std::env::var("THEREIWAS_LOGGING_LEVEL")
+        .unwrap_or_else(|_| "info".to_string())
+        .to_lowercase()
+        .as_str()
+    {
+        "trace" => LevelFilter::Trace,
+        "debug" => LevelFilter::Debug,
+        "info" => LevelFilter::Info,
+        "warn" => LevelFilter::Warn,
+        "error" => LevelFilter::Error,
+        _ => panic!("Unknown logging level"),
+    }
+}
+
 #[rocket::main]
 async fn main() {
     dotenv::dotenv().ok();
 
-    setup_logging(LevelFilter::Debug).await;
+    let logfile_path = std::env::var("THEREIWAS_LOGFILE")
+        .unwrap_or_else(|_| "/var/log/thereiwas/server.log".to_string());
+    setup_logging(get_logging_level().await, &logfile_path).await;
 
     let database_connection_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_connection_pool_manager = diesel::r2d2::ConnectionManager::new(&database_connection_url);

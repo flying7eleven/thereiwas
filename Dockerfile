@@ -35,6 +35,11 @@ RUN adduser \
 
 RUN apt update && apt install -y libpq5
 
+RUN mkdir /var/log/thereiwas && \
+    touch /var/log/thereiwas/server.log && \
+    touch /var/log/thereiwas/unprocessable_entities.log && \
+    chown thereiwas:thereiwas -R /var/log/thereiwas
+
 USER thereiwas:thereiwas
 
 # COPY --from=cargo-build --chown=thereiwas:thereiwas /usr/src/app/target/x86_64-unknown-linux-musl/release/thereiwas /usr/local/bin/thereiwas
