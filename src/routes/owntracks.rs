@@ -7,7 +7,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
 use diesel::result::Error::DatabaseError;
 use diesel::{PgConnection, RunQueryDsl};
-use log::{debug, error, trace, warn};
+use log::{debug, error, info, trace, warn};
 use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::{post, State};
@@ -61,6 +61,49 @@ impl From<&str> for ReportTrigger {
 struct GenericRequest {
     #[serde(rename = "_type")]
     pub message_type: String,
+}
+#[derive(Deserialize)]
+pub struct StatusRequestApple {
+    #[serde(rename = "altimeterAuthorizationStatus")]
+    pub altimeter_authorization_status: String,
+    #[serde(rename = "altimeterIsRelativeAltitudeAvailable")]
+    pub altimeter_is_relative_altitude_available: bool,
+    #[serde(rename = "backgroundRefreshStatus")]
+    pub background_refresh_status: String,
+    #[serde(rename = "deviceIdentifierForVendor")]
+    pub device_identifier_for_vendor: String,
+    #[serde(rename = "deviceModel")]
+    pub device_model: String,
+    #[serde(rename = "deviceSystemName")]
+    pub device_system_name: String,
+    #[serde(rename = "deviceSystemVersion")]
+    pub device_system_version: String,
+    #[serde(rename = "deviceUserInterfaceIdiom")]
+    pub device_user_interface_idiom: String,
+    pub locale: String,
+    #[serde(rename = "localeUsesMetricSystem")]
+    pub locale_uses_metric_system: bool,
+    #[serde(rename = "locationManagerAuthorizationStatus")]
+    pub location_manager_authorization_status: String,
+    pub version: String,
+}
+
+#[derive(Deserialize)]
+pub struct StatusRequestAndroid {
+    pub hib: i32,
+    pub bo: i32,
+    pub loc: i32,
+    pub ps: i32,
+    pub wifi: i32,
+}
+
+#[derive(Deserialize)]
+struct StatusRequest {
+    #[serde(rename = "iOS")]
+    pub ios: Option<StatusRequestApple>,
+    pub android: Option<StatusRequestAndroid>,
+    #[serde(rename = "_id")]
+    pub id: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -119,6 +162,74 @@ impl Display for OwnTracksError {
 }
 
 impl Error for OwnTracksError {}
+
+fn handle_status_request(raw_body: &RawBody) -> Result<(), OwnTracksError> {
+    let status_request = match serde_json::from_slice::<StatusRequest>(&raw_body.0) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            let body_str = String::from_utf8_lossy(&raw_body.0);
+            error!(
+                "Received unknown or invalid JSON received (error was {}): {}",
+                e, body_str
+            );
+            return Err(OwnTracksError::RequestBodyParsingError);
+        }
+    };
+    trace!("Received a new status request");
+
+    if let Some(ios_status) = status_request.ios {
+        info!("Status information for iOS:");
+        info!(
+            "  Altimeter authorization status: {}",
+            ios_status.altimeter_authorization_status
+        );
+        info!(
+            "  Is relative altitude available: {}",
+            ios_status.altimeter_is_relative_altitude_available
+        );
+        info!(
+            "  Background refresh status: {}",
+            ios_status.background_refresh_status
+        ); // TODO: better description
+        info!(
+            "  Device identifier: {}",
+            ios_status.device_identifier_for_vendor
+        );
+        info!("  Device model: {}", ios_status.device_model);
+        info!("  Device system name: {}", ios_status.device_system_name);
+        info!(
+            "  Device system version: {}",
+            ios_status.device_system_version
+        );
+        info!(
+            "  Device UI idiom: {}",
+            ios_status.device_user_interface_idiom
+        );
+        info!("  Locale: {}", ios_status.locale);
+        info!(
+            "  Locale uses metric system: {}",
+            ios_status.locale_uses_metric_system
+        );
+        info!(
+            "  Location manager authorization status: {}",
+            ios_status.location_manager_authorization_status
+        );
+        info!("  OwnTracks App version: {}", ios_status.version);
+    }
+    if let Some(android_status) = status_request.android {
+        info!("Status information for Android:");
+        if let Some(request_id) = status_request.id {
+            info!("  Request id: {}", request_id);
+        }
+        info!("  HIB: {}", android_status.hib); // TODO: better description
+        info!("  BO: {}", android_status.bo); // TODO: better description
+        info!("  LOC: {}", android_status.loc); // TODO: better description
+        info!("  PS: {}", android_status.ps); // TODO: better description
+        info!("  WIFI: {}", android_status.wifi); // TODO: better description
+    }
+
+    Ok(())
+}
 
 fn handle_new_location_request(
     raw_body: &RawBody,
@@ -210,6 +321,7 @@ pub fn add_new_location_record(
 
     let message_handling_result = match generic_request.message_type.as_str() {
         "location" => handle_new_location_request(&raw_body, &mut db_connection),
+        "status" => handle_status_request(&raw_body),
         _ => {
             warn!(
                 "There is no implementation for handling {} requests yet",
