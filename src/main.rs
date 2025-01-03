@@ -146,7 +146,7 @@ async fn main() {
     info!("Database preparations done and starting up the API endpoints now...");
     let _ = rocket::custom(rocket_configuration_figment)
         .manage(ThereIWasDatabaseConnection::from(db_connection_pool))
-        .mount("/", routes![add_new_location_record])
+        .mount("/v1", routes![add_new_location_record])
         .register(
             "/",
             catchers![
