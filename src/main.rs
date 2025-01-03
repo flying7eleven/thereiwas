@@ -8,6 +8,7 @@ use rocket::figment::{
     value::{Map, Value},
 };
 use rocket::{catchers, routes, Config as RocketConfig};
+use std::path::Path;
 use std::time::Duration;
 use thereiwas::fairings::ThereIWasDatabaseConnection;
 use thereiwas::routes::owntracks::add_new_location_record;
@@ -41,8 +42,19 @@ pub fn run_migrations(connection: &mut PgConnection) {
 
 async fn setup_logging(logging_level: LevelFilter, logfile_path: &String) {
     let mut base_config = fern::Dispatch::new();
+    let parsed_logfile_path = Path::new(logfile_path);
 
     base_config = base_config.level(logging_level);
+
+    match std::fs::create_dir_all(parsed_logfile_path) {
+        Ok(()) => { /* nothing to do here */ }
+        Err(error) => {
+            panic!(
+                "Failed to create the output folder for the log file. The system error was: {}",
+                error
+            );
+        }
+    }
 
     let logging_target = fern::Dispatch::new()
         .format(|out, message, record| {
@@ -55,7 +67,7 @@ async fn setup_logging(logging_level: LevelFilter, logfile_path: &String) {
             ))
         })
         .chain(std::io::stderr())
-        .chain(fern::log_file(logfile_path).unwrap());
+        .chain(fern::log_file(parsed_logfile_path.join("server.log")).unwrap());
 
     base_config
         .chain(logging_target)
@@ -83,8 +95,8 @@ async fn get_logging_level() -> LevelFilter {
 async fn main() {
     dotenv::dotenv().ok();
 
-    let logfile_path = std::env::var("THEREIWAS_LOGFILE")
-        .unwrap_or_else(|_| "/var/log/thereiwas/server.log".to_string());
+    let logfile_path = std::env::var("THEREIWAS_LOGFILE_PATH")
+        .unwrap_or_else(|_| "/var/log/thereiwas".to_string());
     setup_logging(get_logging_level().await, &logfile_path).await;
 
     let database_connection_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
