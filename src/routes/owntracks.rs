@@ -13,6 +13,47 @@ use rocket::http::Status;
 use rocket::{post, State};
 use serde::{Deserialize, Serialize};
 
+pub enum ReportTrigger {
+    /// Ping issued randomly by background task (iOS,Android)
+    Ping,
+    /// Circular region enter/leave event (iOS,Android)
+    CircularRegion,
+    /// Circular region enter/leave event for +follow regions (iOS)
+    CircularRegionWithFollowRegions,
+    /// Beacon region enter/leave event (iOS)
+    BeaconRegion,
+    /// Response to a reportLocation cmd message (iOS,Android)
+    ReportLocationResponse,
+    /// Manual publish requested by the user (iOS,Android)
+    UserRequest,
+    /// Timer based publish in move (iOS)
+    TimerBased,
+    /// Updated by Settings/Privacy/Locations Services/System Services/Frequent Locations monitoring (iOS)
+    FrequentLocationsMonitoring,
+    /// The trigger which was used is not known to the server. Check logs for more information about the report trigger
+    UnknownTrigger,
+}
+
+impl From<&str> for ReportTrigger {
+    fn from(value: &str) -> Self {
+        match value {
+            "p" => ReportTrigger::Ping,
+            "c" => ReportTrigger::CircularRegion,
+            "C" => ReportTrigger::CircularRegion,
+            "b" => ReportTrigger::BeaconRegion,
+            "r" => ReportTrigger::ReportLocationResponse,
+            "u" => ReportTrigger::UserRequest,
+            "t" => ReportTrigger::TimerBased,
+            "v" => ReportTrigger::FrequentLocationsMonitoring,
+            "?" => ReportTrigger::UnknownTrigger,
+            _ => {
+                error!("Unknown ReportTrigger value: {}", value);
+                ReportTrigger::UnknownTrigger
+            }
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct NewLocationRequest {
     pub lon: f64,
