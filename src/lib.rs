@@ -19,6 +19,13 @@ pub fn custom_handler_bad_request(req: &Request<'_>) -> Json<CustomHandlerError>
     })
 }
 
+#[catch(404)]
+pub fn custom_handler_not_found(req: &Request<'_>) -> Json<CustomHandlerError> {
+    Json(CustomHandlerError {
+        message: format!("Could not find resource {}", req.uri()),
+    })
+}
+
 #[catch(409)]
 pub fn custom_handler_conflict(_: &Request<'_>) -> Json<CustomHandlerError> {
     Json(CustomHandlerError {

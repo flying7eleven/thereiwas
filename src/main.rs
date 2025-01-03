@@ -14,7 +14,7 @@ use thereiwas::fairings::ThereIWasDatabaseConnection;
 use thereiwas::routes::owntracks::add_new_location_record;
 use thereiwas::{
     custom_handler_bad_request, custom_handler_conflict, custom_handler_internal_server_error,
-    custom_handler_unprocessable_entity,
+    custom_handler_not_found, custom_handler_unprocessable_entity,
 };
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
@@ -151,6 +151,7 @@ async fn main() {
             "/",
             catchers![
                 custom_handler_bad_request,
+                custom_handler_not_found,
                 custom_handler_conflict,
                 custom_handler_unprocessable_entity,
                 custom_handler_internal_server_error
