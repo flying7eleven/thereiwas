@@ -107,7 +107,7 @@ fn handle_new_location_request(
         altitude: location_request.alt,
         latitude: location_request.lat,
         longitude: location_request.lon,
-        report_trigger: location_request.t.clone(),
+        report_trigger: location_request.t.clone().map_or("?".to_string(), |s| s),
         measurement_time: DateTime::from_timestamp(location_request.tst, 0)
             .unwrap()
             .naive_utc(),
