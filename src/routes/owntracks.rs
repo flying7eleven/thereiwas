@@ -11,7 +11,7 @@ use log::{error, trace};
 use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::{post, State};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::error::Error;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -57,7 +57,7 @@ impl From<&str> for ReportTrigger {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 struct NewLocationRequest {
     pub lon: f64,
     pub lat: f64,
@@ -74,7 +74,8 @@ struct NewLocationRequest {
     pub vel: Option<i32>,
     pub cog: Option<i32>,
     pub tid: String,
-    pub _type: String,
+    #[serde(rename = "_type")]
+    pub message_type: String,
     #[serde(rename = "BSSID")]
     pub bssid: Option<String>,
     #[serde(rename = "SSID")]
@@ -83,23 +84,6 @@ struct NewLocationRequest {
     pub created_at: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize)]
-struct Waypoint {
-    pub rad: i64,
-    pub tst: i64,
-    pub _type: String,
-    pub rid: String,
-    pub lon: f64,
-    pub lat: f64,
-    pub desc: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct NewWaypointsRequest {
-    pub _type: String,
-    pub topic: String,
-    pub waypoints: Vec<Waypoint>,
-}
 
 #[derive(Debug)]
 enum EntityStorageError {
