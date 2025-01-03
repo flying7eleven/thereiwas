@@ -7,7 +7,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
 use diesel::result::Error::DatabaseError;
 use diesel::{PgConnection, RunQueryDsl};
-use log::{error, trace, warn};
+use log::{debug, error, trace, warn};
 use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::{post, State};
@@ -181,7 +181,7 @@ fn handle_new_location_request(
         return Err(OwnTracksError::GenericDatabaseError);
     }
 
-    trace!("Location request stored successfully");
+    debug!("Location request stored successfully");
     Ok(())
 }
 
