@@ -12,6 +12,9 @@ use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::{post, State};
 use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
 
 pub enum ReportTrigger {
     /// Ping issued randomly by background task (iOS,Android)
@@ -98,10 +101,32 @@ struct NewWaypointsRequest {
     pub waypoints: Vec<Waypoint>,
 }
 
+#[derive(Debug)]
+enum EntityStorageError {
+    LocationAlreadyKnown,
+    GenericDatabaseError,
+}
+
+impl Display for EntityStorageError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            EntityStorageError::LocationAlreadyKnown => {
+                write!(f, "The provided location is already known")
+            }
+            EntityStorageError::GenericDatabaseError => write!(
+                f,
+                "There was an generic database error while trying to query or save an entity"
+            ),
+        }
+    }
+}
+
+impl Error for EntityStorageError {}
+
 fn handle_new_location_request(
     location_request: &NewLocationRequest,
     db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
-) -> Status {
+) -> Result<(), EntityStorageError> {
     let new_record = NewLocation {
         horizontal_accuracy: location_request.acc,
         altitude: location_request.alt,
@@ -129,10 +154,10 @@ fn handle_new_location_request(
     if let Err(DatabaseError(error_kind, error_info)) = query_result {
         if let DatabaseErrorKind::UniqueViolation = error_kind {
             error!("Could not store the location request since the location point was already submitted");
-            return Status::Conflict;
+            return Err(EntityStorageError::LocationAlreadyKnown);
         }
         error!("There was an error reported by the database ({:?}) while storing a location request. The error was {}", error_kind, error_info.message());
-        return Status::InternalServerError;
+        return Err(EntityStorageError::GenericDatabaseError);
     }
 
     if let Err(error) = query_result {
@@ -140,11 +165,11 @@ fn handle_new_location_request(
             "There was an error while trying to store a location request. The error was: {}",
             error
         );
-        return Status::InternalServerError;
+        return Err(EntityStorageError::GenericDatabaseError);
     }
 
     trace!("Location request stored successfully");
-    Status::NoContent
+    Ok(())
 }
 
 #[post("/owntracks", data = "<raw_body>")]
@@ -170,5 +195,11 @@ pub fn add_new_location_record(
 
     let mut db_connection = db_connection_pool.get().unwrap();
 
-    handle_new_location_request(&new_location, &mut db_connection)
+    match handle_new_location_request(&new_location, &mut db_connection) {
+        Ok(_) => Status::NoContent,
+        Err(error) => match error {
+            EntityStorageError::LocationAlreadyKnown => Status::Conflict,
+            EntityStorageError::GenericDatabaseError => Status::InternalServerError,
+        },
+    }
 }
