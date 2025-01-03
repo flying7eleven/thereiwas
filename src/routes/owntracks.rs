@@ -7,7 +7,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
 use diesel::result::Error::DatabaseError;
 use diesel::{PgConnection, RunQueryDsl};
-use log::{error, trace};
+use log::{error, trace, warn};
 use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::{post, State};
@@ -90,33 +90,56 @@ struct NewLocationRequest {
     pub created_at: Option<i64>,
 }
 
-
 #[derive(Debug)]
-enum EntityStorageError {
+enum OwnTracksError {
+    /// Each location can only be stored once. If a second request will result in an error
     LocationAlreadyKnown,
+    /// There was a generic database error while storing an entity. See the logfiles for more information
     GenericDatabaseError,
+    /// The request body of the request could not be parsed. See the logfile for more information
+    RequestBodyParsingError,
 }
 
-impl Display for EntityStorageError {
+impl Display for OwnTracksError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            EntityStorageError::LocationAlreadyKnown => {
+            OwnTracksError::LocationAlreadyKnown => {
                 write!(f, "The provided location is already known")
             }
-            EntityStorageError::GenericDatabaseError => write!(
+            OwnTracksError::GenericDatabaseError => write!(
                 f,
                 "There was an generic database error while trying to query or save an entity"
+            ),
+            OwnTracksError::RequestBodyParsingError => write!(
+                f,
+                "There was an error while trying to parse the request body to the expected data type"
             ),
         }
     }
 }
 
-impl Error for EntityStorageError {}
+impl Error for OwnTracksError {}
 
 fn handle_new_location_request(
-    location_request: &NewLocationRequest,
+    raw_body: &RawBody,
     db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
-) -> Result<(), EntityStorageError> {
+) -> Result<(), OwnTracksError> {
+    let location_request = match serde_json::from_slice::<NewLocationRequest>(&raw_body.0) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            let body_str = String::from_utf8_lossy(&raw_body.0);
+            error!(
+                "Received unknown or invalid JSON received (error was {}): {}",
+                e, body_str
+            );
+            return Err(OwnTracksError::RequestBodyParsingError);
+        }
+    };
+    trace!(
+        "Received a new location request with the tid of {}",
+        location_request.tid
+    );
+
     let new_record = NewLocation {
         horizontal_accuracy: location_request.acc,
         altitude: location_request.alt,
@@ -144,10 +167,10 @@ fn handle_new_location_request(
     if let Err(DatabaseError(error_kind, error_info)) = query_result {
         if let DatabaseErrorKind::UniqueViolation = error_kind {
             error!("Could not store the location request since the location point was already submitted");
-            return Err(EntityStorageError::LocationAlreadyKnown);
+            return Err(OwnTracksError::LocationAlreadyKnown);
         }
         error!("There was an error reported by the database ({:?}) while storing a location request. The error was {}", error_kind, error_info.message());
-        return Err(EntityStorageError::GenericDatabaseError);
+        return Err(OwnTracksError::GenericDatabaseError);
     }
 
     if let Err(error) = query_result {
@@ -155,7 +178,7 @@ fn handle_new_location_request(
             "There was an error while trying to store a location request. The error was: {}",
             error
         );
-        return Err(EntityStorageError::GenericDatabaseError);
+        return Err(OwnTracksError::GenericDatabaseError);
     }
 
     trace!("Location request stored successfully");
@@ -183,29 +206,25 @@ pub fn add_new_location_record(
         generic_request.message_type
     );
 
-    let new_location = match serde_json::from_slice::<NewLocationRequest>(&raw_body.0) {
-        Ok(parsed) => parsed,
-        Err(e) => {
-            let body_str = String::from_utf8_lossy(&raw_body.0);
-            error!(
-                "Received unknown or invalid JSON received (error was {}): {}",
-                e, body_str
-            );
-            return Status::UnprocessableEntity;
-        }
-    };
-    trace!(
-        "Received a new location request with the tid of {}",
-        new_location.tid
-    );
-
     let mut db_connection = db_connection_pool.get().unwrap();
 
-    match handle_new_location_request(&new_location, &mut db_connection) {
+    let message_handling_result = match generic_request.message_type.as_str() {
+        "location" => handle_new_location_request(&raw_body, &mut db_connection),
+        _ => {
+            warn!(
+                "There is no implementation for handling {} requests yet",
+                generic_request.message_type
+            );
+            return Status::BadRequest;
+        }
+    };
+
+    match message_handling_result {
         Ok(_) => Status::NoContent,
         Err(error) => match error {
-            EntityStorageError::LocationAlreadyKnown => Status::Conflict,
-            EntityStorageError::GenericDatabaseError => Status::InternalServerError,
+            OwnTracksError::LocationAlreadyKnown => Status::Conflict,
+            OwnTracksError::RequestBodyParsingError => Status::UnprocessableEntity,
+            OwnTracksError::GenericDatabaseError => Status::InternalServerError,
         },
     }
 }
