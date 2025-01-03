@@ -58,6 +58,12 @@ impl From<&str> for ReportTrigger {
 }
 
 #[derive(Deserialize)]
+struct GenericRequest {
+    #[serde(rename = "_type")]
+    pub message_type: String,
+}
+
+#[derive(Deserialize)]
 struct NewLocationRequest {
     pub lon: f64,
     pub lat: f64,
@@ -161,6 +167,22 @@ pub fn add_new_location_record(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
     raw_body: RawBody,
 ) -> Status {
+    let generic_request = match serde_json::from_slice::<GenericRequest>(&raw_body.0) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            let body_str = String::from_utf8_lossy(&raw_body.0);
+            error!(
+                "The received request body can not be interpreted (error was {}): {}",
+                e, body_str
+            );
+            return Status::UnprocessableEntity;
+        }
+    };
+    trace!(
+        "Received OwnTracks request of type '{}'",
+        generic_request.message_type
+    );
+
     let new_location = match serde_json::from_slice::<NewLocationRequest>(&raw_body.0) {
         Ok(parsed) => parsed,
         Err(e) => {
