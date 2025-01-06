@@ -30,9 +30,9 @@ diesel::table! {
     wifi_access_points (id) {
         id -> Int4,
         #[max_length = 18]
-        bssid -> Nullable<Varchar>,
+        bssid -> Varchar,
         #[max_length = 32]
-        ssid -> Nullable<Varchar>,
+        ssid -> Varchar,
     }
 }
 
