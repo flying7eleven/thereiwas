@@ -1,0 +1,1 @@
+DROP TABLE locations_to_wifi_access_points;

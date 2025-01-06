@@ -19,6 +19,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    locations_to_wifi_access_points (id) {
+        id -> Int4,
+        location_id -> Int4,
+        wifi_access_point_id -> Int4,
+    }
+}
+
+diesel::table! {
     wifi_access_points (id) {
         id -> Int4,
         #[max_length = 18]
@@ -28,4 +36,11 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(locations, wifi_access_points,);
+diesel::joinable!(locations_to_wifi_access_points -> locations (location_id));
+diesel::joinable!(locations_to_wifi_access_points -> wifi_access_points (wifi_access_point_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    locations,
+    locations_to_wifi_access_points,
+    wifi_access_points,
+);
