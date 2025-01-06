@@ -1,12 +1,17 @@
 use crate::fairings::ThereIWasDatabaseConnection;
-use crate::models::NewLocation;
+use crate::models::{
+    Location, NewLocation, NewLocationToWifiAccessPoint, NewWifiAccessPoint, WifiAccessPoint,
+};
 use crate::routes::guards::RawBody;
 use crate::schema;
+use crate::schema::wifi_access_points::dsl::bssid as bssid_column;
+use crate::schema::wifi_access_points::dsl::ssid as ssid_column;
+use crate::schema::wifi_access_points::dsl::wifi_access_points;
 use chrono::DateTime;
 use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
 use diesel::result::Error::DatabaseError;
-use diesel::{PgConnection, RunQueryDsl};
+use diesel::{BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use log::{debug, error, info, trace, warn};
 use r2d2::PooledConnection;
 use rocket::http::Status;
@@ -125,10 +130,10 @@ struct NewLocationRequest {
     pub tid: String,
     // #[serde(rename = "_type")]
     // pub message_type: String,
-    // #[serde(rename = "BSSID")]
-    // pub bssid: Option<String>,
-    // #[serde(rename = "SSID")]
-    // pub ssid: Option<String>,
+    #[serde(rename = "BSSID")]
+    pub bssid: Option<String>,
+    #[serde(rename = "SSID")]
+    pub ssid: Option<String>,
     // pub conn: Option<String>,
     pub created_at: Option<i64>,
 }
@@ -137,6 +142,8 @@ struct NewLocationRequest {
 enum OwnTracksError {
     /// Each location can only be stored once. If a second request will result in an error
     LocationAlreadyKnown,
+    /// The combination of the BSSID and the SSID can only be stored once. If this constraint is violated, an error is thrown
+    WiFiAPInformationAlreadyKnown,
     /// There was a generic database error while storing an entity. See the logfiles for more information
     GenericDatabaseError,
     /// The request body of the request could not be parsed. See the logfile for more information
@@ -148,6 +155,9 @@ impl Display for OwnTracksError {
         match self {
             OwnTracksError::LocationAlreadyKnown => {
                 write!(f, "The provided location is already known")
+            },
+            OwnTracksError::WiFiAPInformationAlreadyKnown => {
+                write!(f, "The provided WiFi access point BSSID/SSID combination is already known")
             }
             OwnTracksError::GenericDatabaseError => write!(
                 f,
@@ -231,6 +241,98 @@ fn handle_status_request(raw_body: &RawBody) -> Result<(), OwnTracksError> {
     Ok(())
 }
 
+fn store_wifi_access_point_association(
+    location_id: i32,
+    wifi_ap_id: i32,
+    db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
+) -> Result<(), OwnTracksError> {
+    let new_location_to_wifi_ap_entry = NewLocationToWifiAccessPoint {
+        location_id,
+        wifi_access_point_id: wifi_ap_id,
+    };
+
+    diesel::insert_into(schema::locations_to_wifi_access_points::table)
+        .values(&new_location_to_wifi_ap_entry)
+        .execute(db_connection)
+        .map(|query_result| {
+            if query_result != 1 {
+                error!(
+                    "Failed to insert association between location {} and WiFi AP {}",
+                    location_id, wifi_ap_id
+                );
+                return Err(OwnTracksError::GenericDatabaseError);
+            }
+            Ok(())
+        })
+        .unwrap()
+}
+
+fn get_wifi_access_point_entry_id(
+    bssid: &String,
+    ssid: &String,
+    db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
+) -> Result<i32, OwnTracksError> {
+    match wifi_access_points
+        .filter(
+            bssid_column
+                .eq(bssid.to_uppercase())
+                .and(ssid_column.eq(ssid)),
+        )
+        .load::<WifiAccessPoint>(db_connection)
+    {
+        Ok(result) => {
+            if !result.is_empty() {
+                let id = result[0].id;
+                trace!(
+                    "Found existing database entry for BSSID {} and SSID '{}' with the id {}",
+                    bssid,
+                    ssid,
+                    id
+                );
+                return Ok(id);
+            }
+        }
+        Err(error) => {
+            error!("Failed to query if a WiFi AP with the BBID {} and the SSID '{}' does exist or not. The error was: {}", bssid, ssid, error);
+            return Err(OwnTracksError::GenericDatabaseError);
+        }
+    }
+
+    let new_wifi_ap_entry = NewWifiAccessPoint {
+        bssid: bssid.to_uppercase(), // TODO: OwnTracks omits a leading 0; maybe fix that here?!
+        ssid: ssid.clone(),
+    };
+
+    let query_result = diesel::insert_into(schema::wifi_access_points::table)
+        .values(&new_wifi_ap_entry)
+        .get_results::<WifiAccessPoint>(db_connection);
+
+    match query_result {
+        Ok(added_entities) => {
+            if let Some(entity) = added_entities.last() {
+                return Ok(entity.id);
+            }
+        }
+        Err(DatabaseError(error_kind, error_info)) => {
+            if let DatabaseErrorKind::UniqueViolation = error_kind {
+                if let DatabaseErrorKind::UniqueViolation = error_kind {
+                    error!("Could not store the WiFi access point information since the the information where already stored previously");
+                    return Err(OwnTracksError::WiFiAPInformationAlreadyKnown);
+                }
+                error!("There was an error reported by the database ({:?}) while storing WiFi AP information. The error was {}", error_kind, error_info.message());
+                return Err(OwnTracksError::GenericDatabaseError);
+            }
+        }
+        Err(error) => {
+            error!("There was an error reported by the database while storing WiFi AP information. The error was {}", error);
+            return Err(OwnTracksError::GenericDatabaseError);
+        }
+    }
+
+    error!("No entity was stored when trying to add the WiFi AP information for BSSID {} and SSID '{}' to the database", bssid, ssid);
+    Err(OwnTracksError::GenericDatabaseError)
+}
+
 fn handle_new_location_request(
     raw_body: &RawBody,
     db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
@@ -273,7 +375,7 @@ fn handle_new_location_request(
 
     let query_result = diesel::insert_into(schema::locations::table)
         .values(&new_record)
-        .execute(db_connection);
+        .load::<Location>(db_connection);
 
     if let Err(DatabaseError(error_kind, error_info)) = query_result {
         if let DatabaseErrorKind::UniqueViolation = error_kind {
@@ -290,6 +392,31 @@ fn handle_new_location_request(
             error
         );
         return Err(OwnTracksError::GenericDatabaseError);
+    }
+
+    if let Some(bssid) = location_request.bssid {
+        let ssid = location_request.ssid.unwrap_or("".to_string());
+        trace!("The last location request contained also WiFi AP association information for the BSSID {} (SSID '{}')", bssid, ssid);
+
+        let location_id = query_result
+            .map(|stored_locations| stored_locations.last().unwrap().id)
+            .unwrap();
+        match get_wifi_access_point_entry_id(&bssid, &ssid, db_connection) {
+            Ok(wifi_association_id) => {
+                if let Err(error) = store_wifi_access_point_association(
+                    location_id,
+                    wifi_association_id,
+                    db_connection,
+                ) {
+                    return Err(error);
+                }
+            }
+            Err(error) => {
+                return Err(error);
+            }
+        }
+
+        // TODO: maybe separate transaction for the wifi association
     }
 
     debug!("Location request stored successfully");
@@ -335,6 +462,7 @@ pub fn add_new_location_record(
         Ok(_) => Status::NoContent,
         Err(error) => match error {
             OwnTracksError::LocationAlreadyKnown => Status::Conflict,
+            OwnTracksError::WiFiAPInformationAlreadyKnown => Status::Conflict,
             OwnTracksError::RequestBodyParsingError => Status::UnprocessableEntity,
             OwnTracksError::GenericDatabaseError => Status::InternalServerError,
         },
