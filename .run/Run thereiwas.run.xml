@@ -21,6 +21,7 @@
     </method>
   </configuration>
   <configuration default="false" name="Run thereiwas" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="buildProfileId" value="dev" />
     <option name="command" value="run --package thereiwas --bin thereiwas" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs>
