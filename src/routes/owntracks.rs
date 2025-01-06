@@ -333,6 +333,15 @@ fn get_wifi_access_point_entry_id(
     Err(OwnTracksError::GenericDatabaseError)
 }
 
+fn fix_owntracks_bssid_error(received_bssid: &String) -> String {
+    received_bssid
+        .split(':')
+        .map(|part| u8::from_str_radix(part, 16).unwrap_or(0))
+        .map(|val| format!("{:02X}", val))
+        .collect::<Vec<_>>()
+        .join(":")
+}
+
 fn handle_new_location_request(
     raw_body: &RawBody,
     db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
@@ -396,12 +405,13 @@ fn handle_new_location_request(
 
     if let Some(bssid) = location_request.bssid {
         let ssid = location_request.ssid.unwrap_or("".to_string());
-        trace!("The last location request contained also WiFi AP association information for the BSSID {} (SSID '{}')", bssid, ssid);
+        let fixed_bssid = fix_owntracks_bssid_error(&bssid);
+        trace!("The last location request contained also WiFi AP association information for the BSSID {} (SSID '{}')", fixed_bssid, ssid);
 
         let location_id = query_result
             .map(|stored_locations| stored_locations.last().unwrap().id)
             .unwrap();
-        match get_wifi_access_point_entry_id(&bssid, &ssid, db_connection) {
+        match get_wifi_access_point_entry_id(&fixed_bssid, &ssid, db_connection) {
             Ok(wifi_association_id) => {
                 if let Err(error) = store_wifi_access_point_association(
                     location_id,
