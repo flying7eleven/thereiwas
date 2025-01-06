@@ -17,3 +17,15 @@ diesel::table! {
         created_at -> Nullable<Timestamp>,
     }
 }
+
+diesel::table! {
+    wifi_access_points (id) {
+        id -> Int4,
+        #[max_length = 18]
+        bssid -> Nullable<Varchar>,
+        #[max_length = 32]
+        ssid -> Nullable<Varchar>,
+    }
+}
+
+diesel::allow_tables_to_appear_in_same_query!(locations, wifi_access_points,);

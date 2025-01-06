@@ -1,0 +1,1 @@
+DROP TABLE wifi_access_points;
