@@ -14,5 +14,5 @@ CREATE TABLE locations
     created_at          TIMESTAMP  DEFAULT NULL,
 
     -- ensure those fields stay unique. There should never be the same coordinates with the same measurment time from the same client
-    constraint table_name_pk unique (latitude, longitude, measurement_time, topic)
+    constraint locations_unique_key unique (latitude, longitude, measurement_time, topic)
 );
