@@ -1,4 +1,5 @@
 # There I Was
+[![Build server](https://github.com/flying7eleven/thereiwas/actions/workflows/build_server.yml/badge.svg)](https://github.com/flying7eleven/thereiwas/actions/workflows/build_server.yml)
 
 **There I Was** is an open-source API, written in Rust, that automatically receives and stores geocoordinates sent from a smartphone.
 Inspired by services like Google Maps Timeline / Location History, this project aims to provide a self-hosted, privacy-focused way to track and visualize your location history over the years.
