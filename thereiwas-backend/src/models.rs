@@ -39,6 +39,7 @@ pub struct WifiAccessPoint {
     pub id: i32,
     pub bssid: String,
     pub ssid: String,
+    pub last_seen: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable)]
@@ -46,6 +47,7 @@ pub struct WifiAccessPoint {
 pub struct NewWifiAccessPoint {
     pub bssid: String,
     pub ssid: String,
+    pub last_seen: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable)]

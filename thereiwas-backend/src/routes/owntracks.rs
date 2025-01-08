@@ -7,7 +7,7 @@ use crate::schema;
 use crate::schema::wifi_access_points::dsl::bssid as bssid_column;
 use crate::schema::wifi_access_points::dsl::ssid as ssid_column;
 use crate::schema::wifi_access_points::dsl::wifi_access_points;
-use chrono::DateTime;
+use chrono::{DateTime, Utc};
 use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
 use diesel::result::Error::DatabaseError;
@@ -299,8 +299,9 @@ fn get_wifi_access_point_entry_id(
     }
 
     let new_wifi_ap_entry = NewWifiAccessPoint {
-        bssid: bssid.to_uppercase(), // TODO: OwnTracks omits a leading 0; maybe fix that here?!
+        bssid: bssid.to_uppercase(),
         ssid: ssid.clone(),
+        last_seen: Some(Utc::now().naive_utc()),
     };
 
     let query_result = diesel::insert_into(schema::wifi_access_points::table)
