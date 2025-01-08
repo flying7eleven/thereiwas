@@ -33,6 +33,7 @@ diesel::table! {
         bssid -> Varchar,
         #[max_length = 32]
         ssid -> Varchar,
+        last_seen -> Nullable<Timestamp>,
     }
 }
 
