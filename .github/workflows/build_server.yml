@@ -1,4 +1,4 @@
-name: Build server
+name: Build thereiwas-backend
 on:
   push:
     branches: [ main ]
@@ -24,8 +24,8 @@ jobs:
           fetch-depth: 0
       - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }} && rustup component add rustfmt
       - run: cargo build --verbose
-        working-directory: server
+        working-directory: thereiwas-backend
       - run: cargo fmt --all -- --check
-        working-directory: server
+        working-directory: thereiwas-backend
       - run: cargo test --verbose
-        working-directory: server
+        working-directory: thereiwas-backend

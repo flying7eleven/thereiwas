@@ -7,7 +7,7 @@ FROM rust:latest AS cargo-build
 
 WORKDIR /usr/src/app
 
-COPY . /usr/src/app
+COPY thereiwas-backend /usr/src/app
 
 #RUN cargo build --release --target x86_64-unknown-linux-musl
 

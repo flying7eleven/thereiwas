@@ -24,9 +24,9 @@ jobs:
       - run: cargo install clippy-sarif sarif-fmt
       - run: cargo clippy --all-features --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
         continue-on-error: true
-        working-directory: server
+        working-directory: thereiwas-backend
       - uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ./server/rust-clippy-results.sarif
+          sarif_file: ./thereiwas-backend/rust-clippy-results.sarif
           wait-for-processing: true
 

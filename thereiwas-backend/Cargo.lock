@@ -1366,7 +1366,7 @@ dependencies = [
 
 [[package]]
 name = "thereiwas"
-version = "2025.1.3"
+version = "2025.1.8"
 dependencies = [
  "chrono",
  "diesel",
