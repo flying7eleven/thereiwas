@@ -7,6 +7,7 @@ use crate::schema;
 use crate::schema::wifi_access_points::dsl::bssid as bssid_column;
 use crate::schema::wifi_access_points::dsl::ssid as ssid_column;
 use crate::schema::wifi_access_points::dsl::wifi_access_points;
+use crate::schema::wifi_access_points::last_seen;
 use chrono::{DateTime, Utc};
 use diesel::r2d2::ConnectionManager;
 use diesel::result::DatabaseErrorKind;
@@ -289,6 +290,23 @@ fn get_wifi_access_point_entry_id(
                     ssid,
                     id
                 );
+
+                match diesel::update(wifi_access_points.find(id))
+                    .set(last_seen.eq(Some(Utc::now().naive_utc())))
+                    .execute(db_connection)
+                {
+                    Ok(result) => {
+                        if 1 != result {
+                            error!("Failed to update the last seen time for the WiFi AP with the id {}. No row was updated", id);
+                            return Err(OwnTracksError::GenericDatabaseError);
+                        }
+                    }
+                    Err(e) => {
+                        error!("Failed to update the last seen time for the WiFi AP with the id {}. The error was: {}", id, e);
+                        return Err(OwnTracksError::GenericDatabaseError);
+                    }
+                }
+
                 return Ok(id);
             }
         }
