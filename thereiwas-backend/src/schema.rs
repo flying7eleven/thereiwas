@@ -1,6 +1,18 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    client_tokens (id) {
+        id -> Int4,
+        #[max_length = 36]
+        client -> Varchar,
+        #[max_length = 10]
+        secret -> Varchar,
+        #[max_length = 128]
+        description -> Nullable<Varchar>,
+    }
+}
+
+diesel::table! {
     locations (id) {
         id -> Int4,
         horizontal_accuracy -> Nullable<Int4>,
@@ -41,6 +53,7 @@ diesel::joinable!(locations_to_wifi_access_points -> locations (location_id));
 diesel::joinable!(locations_to_wifi_access_points -> wifi_access_points (wifi_access_point_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    client_tokens,
     locations,
     locations_to_wifi_access_points,
     wifi_access_points,
