@@ -430,16 +430,13 @@ fn handle_new_location_request(
         let location_id = query_result
             .map(|stored_locations| stored_locations.last().unwrap().id)
             .unwrap();
+
         match get_wifi_access_point_entry_id(&fixed_bssid, &ssid, db_connection) {
-            Ok(wifi_association_id) => {
-                if let Err(error) = store_wifi_access_point_association(
-                    location_id,
-                    wifi_association_id,
-                    db_connection,
-                ) {
-                    return Err(error);
-                }
-            }
+            Ok(wifi_association_id) => store_wifi_access_point_association(
+                location_id,
+                wifi_association_id,
+                db_connection,
+            )?,
             Err(error) => {
                 return Err(error);
             }
