@@ -352,7 +352,7 @@ fn get_wifi_access_point_entry_id(
     Err(OwnTracksError::GenericDatabaseError)
 }
 
-fn fix_owntracks_bssid_error(received_bssid: &String) -> String {
+fn fix_owntracks_bssid_error(received_bssid: &str) -> String {
     received_bssid
         .split(':')
         .map(|part| u8::from_str_radix(part, 16).unwrap_or(0))
