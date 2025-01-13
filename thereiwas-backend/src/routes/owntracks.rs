@@ -396,7 +396,7 @@ fn handle_new_location_request(
             .topic
             .clone()
             .unwrap_or("unknown".to_string()),
-        created_at: location_request.created_at.map_or(None, |time_stamp| {
+        created_at: location_request.created_at.and_then(|time_stamp| {
             Some(DateTime::from_timestamp(time_stamp, 0).unwrap().naive_utc())
         }),
     };
