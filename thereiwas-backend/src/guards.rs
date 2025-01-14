@@ -3,7 +3,7 @@ use crate::models::ClientToken;
 use crate::schema::client_tokens::dsl::client_tokens;
 use crate::schema::client_tokens::{client as client_id_column, secret as client_secret_column};
 use diesel::{BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl};
-use log::{error, warn};
+use log::{debug, error, warn};
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 use rocket::{Request, State};
@@ -58,10 +58,17 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                     .load::<ClientToken>(&mut db_connection_pool)
                 {
                     Ok(matching_client_tokens) => {
-                        let client_token = matching_client_tokens.get(0).unwrap(); // TODO: better error handling
-                        return Outcome::Success(AuthenticatedClient {
-                            id: client_token.id,
-                        });
+                        if let Some(client_token) = matching_client_tokens.get(0) {
+                            debug!("Successfully found valid token. Authenticating client with the id {}", client_token.id);
+                            return Outcome::Success(AuthenticatedClient {
+                                id: client_token.id,
+                            });
+                        }
+                        warn!("Could not find a matching client_id and client_secret pair in the database");
+                        return Outcome::Error((
+                            Status::Forbidden,
+                            AuthorizationError::MissingAuthorizationUrlParameter,
+                        ));
                     }
                     Err(e) => {
                         error!("Failed to query the client token for the client with the id of {}. The error was: {}", client_id, e);
