@@ -1,4 +1,6 @@
-use crate::schema::{locations, locations_to_wifi_access_points, wifi_access_points};
+use crate::schema::{
+    client_tokens, locations, locations_to_wifi_access_points, wifi_access_points,
+};
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable, Selectable};
 
@@ -55,4 +57,13 @@ pub struct NewWifiAccessPoint {
 pub struct NewLocationToWifiAccessPoint {
     pub location_id: i32,
     pub wifi_access_point_id: i32,
+}
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = client_tokens)]
+pub struct ClientToken {
+    pub id: i32,
+    pub client: String,
+    pub secret: String,
+    pub description: Option<String>,
 }

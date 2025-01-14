@@ -3,6 +3,7 @@ use rocket::serde::Serialize;
 use rocket::{catch, Request};
 
 pub mod fairings;
+mod guards;
 pub mod models;
 pub mod routes;
 pub mod schema;
@@ -16,6 +17,13 @@ pub struct CustomHandlerError {
 pub fn custom_handler_bad_request(req: &Request<'_>) -> Json<CustomHandlerError> {
     Json(CustomHandlerError {
         message: format!("Request to {} was not correct", req.uri()),
+    })
+}
+
+#[catch(403)]
+pub fn custom_handler_forbidden(req: &Request<'_>) -> Json<CustomHandlerError> {
+    Json(CustomHandlerError {
+        message: format!("Request to {} was not authorized", req.uri()),
     })
 }
 

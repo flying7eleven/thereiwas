@@ -1,4 +1,5 @@
 use crate::fairings::ThereIWasDatabaseConnection;
+use crate::guards::AuthenticatedClient;
 use crate::models::{
     Location, NewLocation, NewLocationToWifiAccessPoint, NewWifiAccessPoint, WifiAccessPoint,
 };
@@ -453,6 +454,7 @@ fn handle_new_location_request(
 pub fn add_new_location_record(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
     raw_body: RawBody,
+    _client: AuthenticatedClient,
 ) -> Status {
     let generic_request = match serde_json::from_slice::<GenericRequest>(&raw_body.0) {
         Ok(parsed) => parsed,
