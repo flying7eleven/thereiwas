@@ -1,6 +1,21 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    authorization_requests (id) {
+        id -> Int4,
+        request_time -> Timestamp,
+        #[max_length = 16]
+        auth_type -> Varchar,
+        #[max_length = 16]
+        auth_result -> Varchar,
+        #[max_length = 128]
+        identification_principle -> Nullable<Varchar>,
+        #[max_length = 128]
+        source -> Varchar,
+    }
+}
+
+diesel::table! {
     client_tokens (id) {
         id -> Int4,
         #[max_length = 36]
@@ -53,6 +68,7 @@ diesel::joinable!(locations_to_wifi_access_points -> locations (location_id));
 diesel::joinable!(locations_to_wifi_access_points -> wifi_access_points (wifi_access_point_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    authorization_requests,
     client_tokens,
     locations,
     locations_to_wifi_access_points,
