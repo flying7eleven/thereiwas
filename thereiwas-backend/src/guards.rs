@@ -134,7 +134,7 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                     .load::<ClientToken>(&mut db_connection_pool)
                 {
                     Ok(matching_client_tokens) => {
-                        if let Some(client_token) = matching_client_tokens.get(0) {
+                        if let Some(client_token) = matching_client_tokens.first() {
                             debug!("Successfully found valid token. Authenticating client with the id {}", client_token.id);
                             log_authentication_attempt(
                                 &mut db_connection_pool,
