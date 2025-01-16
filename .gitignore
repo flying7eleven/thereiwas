@@ -1,5 +1,8 @@
 .idea
 target/
 volumes/
+node_modules/
+build/
+dist/
 *.log
 .env
