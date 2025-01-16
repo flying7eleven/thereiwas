@@ -65,7 +65,7 @@ fn log_authentication_attempt(
         request_time: Utc::now().naive_utc(),
         auth_type: auth_type.to_string(),
         auth_result: auth_result.to_string(),
-        identification_principle: identification_principle.and_then(|x| Some(x.clone())),
+        identification_principle: identification_principle.cloned(),
         source: request_source.clone(),
     };
 
