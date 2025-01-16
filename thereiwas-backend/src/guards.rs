@@ -59,14 +59,14 @@ fn log_authentication_attempt(
     auth_type: AuthorizationType,
     auth_result: AuthorizationResult,
     identification_principle: Option<&String>,
-    request_source: &String,
+    request_source: &str,
 ) {
     let new_authorization_request = NewAuthorizationRequest {
         request_time: Utc::now().naive_utc(),
         auth_type: auth_type.to_string(),
         auth_result: auth_result.to_string(),
         identification_principle: identification_principle.cloned(),
-        source: request_source.clone(),
+        source: request_source.to_owned(),
     };
 
     if let Err(error) = diesel::insert_into(schema::authorization_requests::table)
