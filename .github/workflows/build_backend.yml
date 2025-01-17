@@ -2,10 +2,11 @@ name: Build thereiwas-backend
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - '**/README.md'
+    paths:
+      - 'thereiwas-backend/**'
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 env:
   CARGO_TERM_COLOR: always
 jobs:
