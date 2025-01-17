@@ -16,4 +16,4 @@ RUN npm run build
 # ------------------------------------------------------------------------------
 FROM nginx:alpine
 
-COPY --from=node-build --chown=1001 /usr/src/app/dist /usr/share/nginx/html
+COPY --from=node-build --chown=1001 /usr/src/app/build /usr/share/nginx/html
