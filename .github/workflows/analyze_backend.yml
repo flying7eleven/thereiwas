@@ -1,4 +1,4 @@
-name: Analyze backend code
+name: "Analyze: Backend"
 
 on:
   push:

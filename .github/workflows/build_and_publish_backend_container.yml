@@ -1,4 +1,4 @@
-name: Build publish container (thereiwas-backend)
+name: "Release: Backend"
 on:
   push:
     tags: '[0-9]+.[0-9]+.[0-9]+'

@@ -1,4 +1,4 @@
-name: Build thereiwas-backend
+name: "Build: Backend"
 on:
   push:
     branches: [ main ]

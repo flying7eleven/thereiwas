@@ -1,4 +1,4 @@
-name: Build thereiwas-frontend
+name: "Build: Frontend"
 on:
   push:
     branches: [ main ]
