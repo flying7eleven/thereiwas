@@ -1,7 +1,7 @@
 name: "Release: Frontend"
 on:
   push:
-    tags: '[0-9]+.[0-9]+.[0-9]+'
+    tags: 'frontend-[0-9]+.[0-9]+.[0-9]+'
 env:
   VERGEN_IDEMPOTENT: false
 
