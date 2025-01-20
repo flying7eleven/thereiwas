@@ -11,6 +11,7 @@ use rocket::{catchers, routes, Config as RocketConfig};
 use std::path::Path;
 use std::time::Duration;
 use thereiwas::fairings::ThereIWasDatabaseConnection;
+use thereiwas::routes::get_health_status;
 use thereiwas::routes::owntracks::add_new_location_record;
 use thereiwas::{
     custom_handler_bad_request, custom_handler_conflict, custom_handler_forbidden,
@@ -147,7 +148,7 @@ async fn main() {
     info!("Database preparations done and starting up the API endpoints now...");
     let _ = rocket::custom(rocket_configuration_figment)
         .manage(ThereIWasDatabaseConnection::from(db_connection_pool))
-        .mount("/v1", routes![add_new_location_record])
+        .mount("/v1", routes![get_health_status, add_new_location_record])
         .register(
             "/",
             catchers![
