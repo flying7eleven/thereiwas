@@ -125,7 +125,7 @@ struct NewLocationRequest {
     pub p: Option<f64>,
     pub vac: Option<i32>,
     pub t: Option<String>,
-    pub topic: Option<String>,
+    // pub topic: Option<String>,
     pub alt: Option<i32>,
     // pub vel: Option<i32>,
     // pub cog: Option<i32>,
@@ -364,6 +364,7 @@ fn fix_owntracks_bssid_error(received_bssid: &str) -> String {
 
 fn handle_new_location_request(
     raw_body: &RawBody,
+    reporting_device: i32,
     db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
 ) -> Result<(), OwnTracksError> {
     let location_request = match serde_json::from_slice::<NewLocationRequest>(&raw_body.0) {
@@ -393,13 +394,10 @@ fn handle_new_location_request(
             .naive_utc(),
         vertical_accuracy: location_request.vac,
         barometric_pressure: location_request.p,
-        topic: location_request
-            .topic
-            .clone()
-            .unwrap_or("unknown".to_string()),
         created_at: location_request
             .created_at
             .map(|time_stamp| DateTime::from_timestamp(time_stamp, 0).unwrap().naive_utc()),
+        reporting_device,
     };
 
     let query_result = diesel::insert_into(schema::locations::table)
@@ -454,7 +452,7 @@ fn handle_new_location_request(
 pub fn add_new_location_record(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
     raw_body: RawBody,
-    _client: AuthenticatedClient,
+    client: AuthenticatedClient,
 ) -> Status {
     let generic_request = match serde_json::from_slice::<GenericRequest>(&raw_body.0) {
         Ok(parsed) => parsed,
@@ -475,7 +473,7 @@ pub fn add_new_location_record(
     let mut db_connection = db_connection_pool.get().unwrap();
 
     let message_handling_result = match generic_request.message_type.as_str() {
-        "location" => handle_new_location_request(&raw_body, &mut db_connection),
+        "location" => handle_new_location_request(&raw_body, client.id, &mut db_connection),
         "status" => handle_status_request(&raw_body),
         _ => {
             warn!(

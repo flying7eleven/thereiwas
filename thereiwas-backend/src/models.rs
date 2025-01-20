@@ -17,8 +17,8 @@ pub struct Location {
     pub measurement_time: NaiveDateTime,
     pub vertical_accuracy: Option<i32>,
     pub barometric_pressure: Option<f64>,
-    pub topic: String,
     pub created_at: Option<NaiveDateTime>,
+    pub reporting_device: i32,
 }
 
 #[derive(Insertable)]
@@ -32,8 +32,8 @@ pub struct NewLocation {
     pub measurement_time: NaiveDateTime,
     pub vertical_accuracy: Option<i32>,
     pub barometric_pressure: Option<f64>,
-    pub topic: String,
     pub created_at: Option<NaiveDateTime>,
+    pub reporting_device: i32,
 }
 
 #[derive(Queryable, Selectable)]

@@ -39,9 +39,8 @@ diesel::table! {
         measurement_time -> Timestamp,
         vertical_accuracy -> Nullable<Int4>,
         barometric_pressure -> Nullable<Float8>,
-        #[max_length = 200]
-        topic -> Varchar,
         created_at -> Nullable<Timestamp>,
+        reporting_device -> Int4,
     }
 }
 
