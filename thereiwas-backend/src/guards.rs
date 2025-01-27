@@ -1,17 +1,13 @@
 use crate::fairings::ThereIWasDatabaseConnection;
-use crate::models::{ClientToken, NewAuditLog};
-use crate::schema;
+use crate::models::ClientToken;
 use crate::schema::client_tokens::dsl::client_tokens;
 use crate::schema::client_tokens::{client as client_id_column, secret as client_secret_column};
-use chrono::Utc;
-use diesel::r2d2::ConnectionManager;
-use diesel::{BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use crate::{log_audit_message, AuditLogAction, AuditLogResult};
+use diesel::{BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::{debug, error, warn};
-use r2d2::PooledConnection;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 use rocket::{Request, State};
-use std::fmt;
 use std::net::{IpAddr, SocketAddr};
 
 pub struct AuthenticatedClient {
@@ -26,66 +22,6 @@ pub enum AuthorizationError {
     DatabaseConnectionPoolNotFound,
     /// There was a generic database error which prevented to fetch information
     DatabaseError,
-}
-
-enum AuthorizationType {
-    ClientToken,
-}
-
-impl fmt::Display for AuthorizationType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            AuthorizationType::ClientToken => write!(f, "ClientToken"),
-        }
-    }
-}
-
-enum AuthorizationResult {
-    Successful,
-    Failed,
-}
-
-impl fmt::Display for AuthorizationResult {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            AuthorizationResult::Successful => write!(f, "Successful"),
-            AuthorizationResult::Failed => write!(f, "Failed"),
-        }
-    }
-}
-
-fn log_authentication_attempt(
-    db_coonection: &mut PooledConnection<ConnectionManager<PgConnection>>,
-    auth_type: AuthorizationType,
-    auth_result: AuthorizationResult,
-    identification_principle: Option<&String>,
-    request_source: &str,
-) {
-    let new_authorization_request = NewAuditLog {
-        request_time: Utc::now().naive_utc(),
-        action: auth_type.to_string(),
-        result: auth_result.to_string(),
-        source: request_source.to_owned(),
-    };
-
-    if let Err(error) = diesel::insert_into(schema::audit_log::table)
-        .values(&new_authorization_request)
-        .execute(db_coonection)
-        .map(|query_result| {
-            if query_result != 1 {
-                error!(
-                    "Failed to insert authorization request for principal {} into database",
-                    identification_principle.unwrap_or(&"<unknown>".to_string())
-                );
-            }
-        })
-    {
-        error!(
-            "Failed to insert authorization request for principal {}. The error was: {}",
-            identification_principle.unwrap(),
-            error
-        );
-    }
 }
 
 #[rocket::async_trait]
@@ -135,11 +71,10 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                     Ok(matching_client_tokens) => {
                         if let Some(client_token) = matching_client_tokens.first() {
                             debug!("Successfully found valid token. Authenticating client with the id {}", client_token.id);
-                            log_authentication_attempt(
+                            log_audit_message(
                                 &mut db_connection_pool,
-                                AuthorizationType::ClientToken,
-                                AuthorizationResult::Successful,
-                                Some(&client_id),
+                                AuditLogAction::ClientTokenAuthentication,
+                                AuditLogResult::Successful,
                                 &format!("Request originated from {}", remote_endppoint),
                             );
                             return Outcome::Success(AuthenticatedClient {
@@ -147,11 +82,10 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                             });
                         }
                         warn!("Could not find a matching client_id and client_secret pair in the database");
-                        log_authentication_attempt(
+                        log_audit_message(
                             &mut db_connection_pool,
-                            AuthorizationType::ClientToken,
-                            AuthorizationResult::Failed,
-                            Some(&client_id),
+                            AuditLogAction::ClientTokenAuthentication,
+                            AuditLogResult::Failed,
                             &format!("Request originated from {}", remote_endppoint),
                         );
                         return Outcome::Error((
@@ -161,11 +95,10 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                     }
                     Err(e) => {
                         error!("Failed to query the client token for the client with the id of {}. The error was: {}", client_id, e);
-                        log_authentication_attempt(
+                        log_audit_message(
                             &mut db_connection_pool,
-                            AuthorizationType::ClientToken,
-                            AuthorizationResult::Failed,
-                            Some(&client_id),
+                            AuditLogAction::ClientTokenAuthentication,
+                            AuditLogResult::Failed,
                             &format!("Request originated from {}", remote_endppoint),
                         );
                         return Outcome::Error((
