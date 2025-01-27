@@ -1,5 +1,5 @@
 use crate::fairings::ThereIWasDatabaseConnection;
-use crate::models::{ClientToken, NewAuthorizationRequest};
+use crate::models::{ClientToken, NewAuditLog};
 use crate::schema;
 use crate::schema::client_tokens::dsl::client_tokens;
 use crate::schema::client_tokens::{client as client_id_column, secret as client_secret_column};
@@ -61,15 +61,14 @@ fn log_authentication_attempt(
     identification_principle: Option<&String>,
     request_source: &str,
 ) {
-    let new_authorization_request = NewAuthorizationRequest {
+    let new_authorization_request = NewAuditLog {
         request_time: Utc::now().naive_utc(),
-        auth_type: auth_type.to_string(),
-        auth_result: auth_result.to_string(),
-        identification_principle: identification_principle.cloned(),
+        action: auth_type.to_string(),
+        result: auth_result.to_string(),
         source: request_source.to_owned(),
     };
 
-    if let Err(error) = diesel::insert_into(schema::authorization_requests::table)
+    if let Err(error) = diesel::insert_into(schema::audit_log::table)
         .values(&new_authorization_request)
         .execute(db_coonection)
         .map(|query_result| {

@@ -1,6 +1,5 @@
 use crate::schema::{
-    authorization_requests, client_tokens, locations, locations_to_wifi_access_points,
-    wifi_access_points,
+    audit_log, client_tokens, locations, locations_to_wifi_access_points, wifi_access_points,
 };
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable, Selectable};
@@ -70,11 +69,10 @@ pub struct ClientToken {
 }
 
 #[derive(Insertable)]
-#[diesel(table_name = authorization_requests)]
-pub struct NewAuthorizationRequest {
+#[diesel(table_name = audit_log)]
+pub struct NewAuditLog {
     pub request_time: NaiveDateTime,
-    pub auth_type: String,
-    pub auth_result: String,
-    pub identification_principle: Option<String>,
+    pub action: String,
+    pub result: String,
     pub source: String,
 }
