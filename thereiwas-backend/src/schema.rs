@@ -51,6 +51,50 @@ diesel::table! {
 }
 
 diesel::table! {
+    permissions (id) {
+        id -> Int4,
+        #[max_length = 32]
+        name -> Varchar,
+        description -> Text,
+    }
+}
+
+diesel::table! {
+    roles (id) {
+        id -> Int4,
+        #[max_length = 32]
+        name -> Varchar,
+        description -> Text,
+    }
+}
+
+diesel::table! {
+    roles_to_permissions (id) {
+        id -> Int4,
+        role_id -> Int4,
+        permission_id -> Int4,
+    }
+}
+
+diesel::table! {
+    users (id) {
+        id -> Int4,
+        #[max_length = 64]
+        username -> Varchar,
+        #[max_length = 60]
+        password_hash -> Varchar,
+    }
+}
+
+diesel::table! {
+    users_to_roles (id) {
+        id -> Int4,
+        user_id -> Int4,
+        role_id -> Int4,
+    }
+}
+
+diesel::table! {
     wifi_access_points (id) {
         id -> Int4,
         #[max_length = 18]
@@ -63,11 +107,20 @@ diesel::table! {
 
 diesel::joinable!(locations_to_wifi_access_points -> locations (location_id));
 diesel::joinable!(locations_to_wifi_access_points -> wifi_access_points (wifi_access_point_id));
+diesel::joinable!(roles_to_permissions -> permissions (permission_id));
+diesel::joinable!(roles_to_permissions -> roles (role_id));
+diesel::joinable!(users_to_roles -> roles (role_id));
+diesel::joinable!(users_to_roles -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     audit_log,
     client_tokens,
     locations,
     locations_to_wifi_access_points,
+    permissions,
+    roles,
+    roles_to_permissions,
+    users,
+    users_to_roles,
     wifi_access_points,
 );
