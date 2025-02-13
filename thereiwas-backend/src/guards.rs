@@ -40,8 +40,8 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                     .ip(),
             )
             .to_string();
-        if let Some(maybe_client_id) = request.query_value::<String>("client") {
-            if let Some(maybe_client_secret) = request.query_value::<String>("secret") {
+        if let Some(maybe_client_id) = request.query_value::<String>("client_id") {
+            if let Some(maybe_client_secret) = request.query_value::<String>("client_secret") {
                 let client_id = maybe_client_id.unwrap(); // TODO: better handling
                 let client_secret = maybe_client_secret.unwrap(); // TODO: better handling
 
