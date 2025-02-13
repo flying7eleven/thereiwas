@@ -10,7 +10,6 @@ use rocket::figment::{
 };
 use rocket::{catchers, routes, Config as RocketConfig};
 use std::collections::HashSet;
-use std::env::current_dir;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;

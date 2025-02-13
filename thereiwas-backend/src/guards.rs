@@ -75,7 +75,7 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                                 &mut db_connection_pool,
                                 AuditLogAction::ClientTokenAuthentication,
                                 AuditLogResult::Successful,
-                                &format!("Request originated from {}", remote_endppoint),
+                                &remote_endppoint,
                             );
                             return Outcome::Success(AuthenticatedClient {
                                 id: client_token.id,
@@ -86,7 +86,7 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                             &mut db_connection_pool,
                             AuditLogAction::ClientTokenAuthentication,
                             AuditLogResult::Failed,
-                            &format!("Request originated from {}", remote_endppoint),
+                            &remote_endppoint,
                         );
                         return Outcome::Error((
                             Status::Forbidden,
@@ -99,7 +99,7 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                             &mut db_connection_pool,
                             AuditLogAction::ClientTokenAuthentication,
                             AuditLogResult::Failed,
-                            &format!("Request originated from {}", remote_endppoint),
+                            &remote_endppoint,
                         );
                         return Outcome::Error((
                             Status::InternalServerError,
