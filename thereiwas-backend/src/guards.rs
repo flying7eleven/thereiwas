@@ -63,7 +63,7 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                 match client_tokens
                     .filter(
                         client_id_column
-                            .eq(client_id.to_uppercase())
+                            .eq(&client_id)
                             .and(client_secret_column.eq(client_secret)),
                     )
                     .load::<ClientToken>(&mut db_connection_pool)
