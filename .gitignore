@@ -5,4 +5,6 @@ node_modules/
 build/
 dist/
 *.log
+*.pem
+*.key
 .env

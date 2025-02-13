@@ -1,6 +1,7 @@
 use chrono::Utc;
 use diesel::PgConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, error, info, LevelFilter};
 use rocket::config::{Shutdown, Sig};
 use rocket::figment::{
@@ -8,15 +9,19 @@ use rocket::figment::{
     value::{Map, Value},
 };
 use rocket::{catchers, routes, Config as RocketConfig};
+use std::collections::HashSet;
+use std::env::current_dir;
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 use std::time::Duration;
 use thereiwas::fairings::ThereIWasDatabaseConnection;
-use thereiwas::routes::get_health_status;
 use thereiwas::routes::owntracks::add_new_location_record;
+use thereiwas::routes::{get_health_status, get_login_token};
 use thereiwas::{
     custom_handler_bad_request, custom_handler_conflict, custom_handler_forbidden,
-    custom_handler_internal_server_error, custom_handler_not_found,
-    custom_handler_unprocessable_entity,
+    custom_handler_internal_server_error, custom_handler_not_found, custom_handler_unauthorized,
+    custom_handler_unprocessable_entity, BackendConfiguration,
 };
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
@@ -93,6 +98,58 @@ async fn get_logging_level() -> LevelFilter {
     }
 }
 
+fn get_encoding_key(pem_file_path: &str) -> EncodingKey {
+    match &mut File::open(&pem_file_path) {
+        Ok(file) => {
+            let mut contents = String::new();
+            if 0 == file.read_to_string(&mut contents).unwrap_or(0) {
+                panic!("Could not read pem file");
+            }
+            match EncodingKey::from_ed_pem(contents.as_bytes()) {
+                Ok(key) => key,
+                Err(error) => {
+                    panic!(
+                        "Failed to parse encoding key. The system error was: {}",
+                        error
+                    );
+                }
+            }
+        }
+        Err(error) => {
+            panic!(
+                "Failed to open encoding key ({}). The system error was: {}",
+                pem_file_path, error
+            );
+        }
+    }
+}
+
+fn get_decoding_key(pem_file_path: &str) -> DecodingKey {
+    match &mut File::open(&pem_file_path) {
+        Ok(file) => {
+            let mut contents = String::new();
+            if 0 == file.read_to_string(&mut contents).unwrap_or(0) {
+                panic!("Could not read pem file");
+            }
+            match DecodingKey::from_ed_pem(contents.as_bytes()) {
+                Ok(key) => key,
+                Err(error) => {
+                    panic!(
+                        "Failed to parse decoding key. The system error was: {}",
+                        error
+                    );
+                }
+            }
+        }
+        Err(error) => {
+            panic!(
+                "Failed to open decoding key ({}). The system error was: {}",
+                pem_file_path, error
+            );
+        }
+    }
+}
+
 #[rocket::main]
 async fn main() {
     dotenv::dotenv().ok();
@@ -100,6 +157,11 @@ async fn main() {
     let logfile_path = std::env::var("THEREIWAS_LOGFILE_PATH")
         .unwrap_or_else(|_| "/var/log/thereiwas".to_string());
     setup_logging(get_logging_level().await, &logfile_path).await;
+
+    let public_key_file_path = std::env::var("THEREIWAS_JWT_PUBLIC_KEY_FILE")
+        .expect("THEREIWAS_JWT_PUBLIC_KEY_FILE has to be specified");
+    let private_key_file_path = std::env::var("THEREIWAS_JWT_PRIVATE_KEY_FILE")
+        .expect("THEREIWAS_JWT_PRIVATE_KEY_FILE has to be specified");
 
     let database_connection_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_connection_pool_manager = diesel::r2d2::ConnectionManager::new(&database_connection_url);
@@ -120,9 +182,16 @@ async fn main() {
     run_migrations(&mut db_connection);
     info!("Database preparations finished");
 
-    let thereiwas_database_config: Map<_, Value> = map! {
+    let thereiwas_database_config: Map<_, Value> = map! { // TODO: there are two different ways for accessing the db right now
         "url" => database_connection_url.into(),
         "pool_size" => 25.into()
+    };
+
+    let backend_config = BackendConfiguration {
+        api_host: "some_host".to_string(), // TODO: this
+        encoding_key: Some(get_encoding_key(private_key_file_path.as_str())),
+        decoding_key: Some(get_decoding_key(public_key_file_path.as_str())),
+        token_audience: HashSet::new(), // TODO: this
     };
 
     let rocket_configuration_figment = RocketConfig::figment()
@@ -148,11 +217,16 @@ async fn main() {
     info!("Database preparations done and starting up the API endpoints now...");
     let _ = rocket::custom(rocket_configuration_figment)
         .manage(ThereIWasDatabaseConnection::from(db_connection_pool))
-        .mount("/v1", routes![get_health_status, add_new_location_record])
+        .manage(backend_config)
+        .mount(
+            "/v1",
+            routes![get_login_token, get_health_status, add_new_location_record],
+        )
         .register(
             "/",
             catchers![
                 custom_handler_bad_request,
+                custom_handler_unauthorized,
                 custom_handler_forbidden,
                 custom_handler_not_found,
                 custom_handler_conflict,

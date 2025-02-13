@@ -11,6 +11,11 @@ exclude = [".github/", ".gitignore"]
 publish = false
 rust-version = "1.81"
 
+[dependencies.bcrypt]
+version = "0.16.0"
+default-features = false
+features = ["std"]
+
 [dependencies.chrono]
 version = "0.4.39"
 default-features = false
@@ -31,6 +36,15 @@ default-features = false
 
 [dependencies.fern]
 version = "0.7.1"
+default-features = false
+
+[dependencies.jsonwebtoken]
+version = "9.3.0"
+default-features = false
+features = ["use_pem"]
+
+[dependencies.lazy_static]
+version = "1.5.0"
 default-features = false
 
 [dependencies.log]

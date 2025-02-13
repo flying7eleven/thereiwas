@@ -26,8 +26,10 @@
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs>
       <env name="DATABASE_URL" value="postgres://thereiwas:debugpassword@localhost/thereiwas" />
-      <env name="THEREIWAS_LOGGING_LEVEL" value="trace" />
+      <env name="THEREIWAS_JWT_PRIVATE_KEY_FILE" value="./ed.private.pem" />
+      <env name="THEREIWAS_JWT_PUBLIC_KEY_FILE" value="./ed.public.pem" />
       <env name="THEREIWAS_LOGFILE_PATH" value="./logs" />
+      <env name="THEREIWAS_LOGGING_LEVEL" value="trace" />
     </envs>
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="DEFAULT" />

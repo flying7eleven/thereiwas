@@ -1,5 +1,5 @@
 use crate::schema::{
-    audit_log, client_tokens, locations, locations_to_wifi_access_points, wifi_access_points,
+    audit_log, client_tokens, locations, locations_to_wifi_access_points, users, wifi_access_points,
 };
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable, Selectable};
@@ -75,4 +75,12 @@ pub struct NewAuditLog {
     pub action: String,
     pub result: String,
     pub source: String,
+}
+
+#[derive(Queryable, Selectable, Clone)]
+#[diesel(table_name = users)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub password_hash: String,
 }
