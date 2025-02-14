@@ -6,7 +6,7 @@ All notable changes since the last release are documented here.
 
 Nothing so far
 
-## 2025.2.13 (backend-only)
+## 2025.2.14 (backend-only)
 
 ### Added
 - **(backend)** Add authentication route for retrieving a JSON Web Token ([03c4256])
