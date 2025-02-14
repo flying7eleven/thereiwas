@@ -4,6 +4,10 @@ All notable changes since the last release are documented here.
 
 ## [Unreleased]
 
+Nothing so far
+
+## 2025.2.13 (backend-only)
+
 ### Added
 - **(backend)** Add authentication route for retrieving a JSON Web Token ([03c4256])
 - **(backend)** Add logging of calling IP during authentication ([2e1af47])
