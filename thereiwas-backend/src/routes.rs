@@ -10,8 +10,9 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::error;
 use rocket::http::Status;
 use rocket::serde::json::Json;
-use rocket::{get, post, State};
+use rocket::{get, post, Request, State};
 use serde::{Deserialize, Serialize};
+use std::net::{IpAddr, SocketAddr};
 
 pub mod guards;
 pub mod owntracks;
@@ -41,7 +42,9 @@ pub fn get_login_token(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
     login_information: Json<LoginInformation>,
     config: &State<BackendConfiguration>,
+    client_ip: Option<IpAddr>,
 ) -> Result<Json<TokenResponse>, Status> {
+    let remote_endppoint = client_ip.unwrap_or(IpAddr::from([0, 0, 0, 0])).to_string();
     let mut db_connection = db_connection_pool.get().unwrap();
 
     // try to get the user record for the supplied username
@@ -88,8 +91,8 @@ pub fn get_login_token(
                 &mut db_connection,
                 AuditLogAction::UserAuthentication,
                 AuditLogResult::Failed,
-                "<unknown>",
-            ); // TODO: ip address
+                &remote_endppoint,
+            );
 
             // finally we can tell teh user that he/she is not authorized
             return Err(Status::Unauthorized);
@@ -105,8 +108,8 @@ pub fn get_login_token(
                     &mut db_connection,
                     AuditLogAction::UserAuthentication,
                     AuditLogResult::Failed,
-                    "<unknown>",
-                ); // TODO: ip address
+                    &remote_endppoint,
+                );
 
                 return Err(Status::Unauthorized);
             }
@@ -129,8 +132,8 @@ pub fn get_login_token(
             &mut db_connection,
             AuditLogAction::UserAuthentication,
             AuditLogResult::Successful,
-            "<unknown>",
-        ); // TODO: ip address
+            &remote_endppoint,
+        );
 
         return Ok(Json(TokenResponse {
             access_token: token,
