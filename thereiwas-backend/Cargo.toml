@@ -12,7 +12,7 @@ publish = false
 rust-version = "1.81"
 
 [dependencies.bcrypt]
-version = "0.16.0"
+version = "0.17.0"
 default-features = false
 features = ["std"]
 
@@ -22,7 +22,7 @@ default-features = false
 features = ["std"]
 
 [dependencies.diesel]
-version = "2.2.6"
+version = "2.2.7"
 default-features = false
 features = ["postgres", "r2d2", "chrono"]
 
@@ -39,7 +39,7 @@ version = "0.7.1"
 default-features = false
 
 [dependencies.jsonwebtoken]
-version = "9.3.0"
+version = "9.3.1"
 default-features = false
 features = ["use_pem"]
 
@@ -67,6 +67,6 @@ default-features = false
 features = ["std"]
 
 [dependencies.serde_json]
-version = "1.0.135"
+version = "1.0.138"
 default-features = false
 features = ["std"]
