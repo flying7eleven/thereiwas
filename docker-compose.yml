@@ -1,0 +1,42 @@
+services:
+  thereiwas_database:
+    container_name: thereiwas_database
+    image: postgres:17-alpine
+    volumes:
+      - ./volumes/thereiwas_database:/var/lib/postgresql/data:rw
+    environment:
+      - POSTGRES_USER=thereiwas
+      - POSTGRES_PASSWORD=debugpassword
+      - POSTGRES_DB=thereiwas
+    restart: "unless-stopped"
+    ports:
+      - "5432:5432" # just needs to be exported for debugging purposes
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U thereiwas" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+  thereiwas_backend:
+    container_name: thereiwas_backend
+    build:
+      context: thereiwas-backend
+    environment:
+      - DATABASE_URL=postgres://thereiwas:debugpassword@thereiwas_database/thereiwas
+      - THEREIWAS_LOGGING_LEVEL=debug
+    restart: "unless-stopped"
+    depends_on:
+      thereiwas_database:
+        condition: service_healthy
+    ports:
+      - "3000:3000" # just needs to be exported for debugging purposes
+    volumes:
+      - ./volumes/thereiwas_logfiles:/var/log/thereiwas
+      - ./thereiwas-backend/ed.public.pem:/usr/local/thereiwas/public.key:ro
+      - ./thereiwas-backend/ed.private.pem:/usr/local/thereiwas/private.key:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --user-agent docker-health-check/1.0 --fail http://thereiwas_backend:3000/v1/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

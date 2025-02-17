@@ -7,7 +7,7 @@ FROM rust:latest AS cargo-build
 
 WORKDIR /usr/src/app
 
-COPY thereiwas-backend /usr/src/app
+COPY . /usr/src/app
 
 #RUN cargo build --release --target x86_64-unknown-linux-musl
 
@@ -33,12 +33,14 @@ RUN adduser \
     --uid 10001 \
     "thereiwas"
 
-RUN apt update && apt install -y libpq5
+RUN apt update && apt install -y libpq5 curl
 
 RUN mkdir /var/log/thereiwas && \
     touch /var/log/thereiwas/server.log && \
     touch /var/log/thereiwas/unprocessable_entities.log && \
-    chown thereiwas:thereiwas -R /var/log/thereiwas
+    chown thereiwas:thereiwas -R /var/log/thereiwas && \
+    mkdir /usr/local/thereiwas && \
+    chown thereiwas:thereiwas -R /usr/local/thereiwas
 
 USER thereiwas:thereiwas
 
