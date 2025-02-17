@@ -98,7 +98,7 @@ async fn get_logging_level() -> LevelFilter {
 }
 
 fn get_encoding_key(pem_file_path: &str) -> EncodingKey {
-    match &mut File::open(&pem_file_path) {
+    match &mut File::open(pem_file_path) {
         Ok(file) => {
             let mut contents = String::new();
             if 0 == file.read_to_string(&mut contents).unwrap_or(0) {
@@ -124,7 +124,7 @@ fn get_encoding_key(pem_file_path: &str) -> EncodingKey {
 }
 
 fn get_decoding_key(pem_file_path: &str) -> DecodingKey {
-    match &mut File::open(&pem_file_path) {
+    match &mut File::open(pem_file_path) {
         Ok(file) => {
             let mut contents = String::new();
             if 0 == file.read_to_string(&mut contents).unwrap_or(0) {
