@@ -158,9 +158,9 @@ async fn main() {
     setup_logging(get_logging_level().await, &logfile_path).await;
 
     let public_key_file_path = std::env::var("THEREIWAS_JWT_PUBLIC_KEY_FILE")
-        .expect("THEREIWAS_JWT_PUBLIC_KEY_FILE has to be specified");
+        .unwrap_or_else(|_| "/usr/local/thereiwas/public.key".to_string());
     let private_key_file_path = std::env::var("THEREIWAS_JWT_PRIVATE_KEY_FILE")
-        .expect("THEREIWAS_JWT_PRIVATE_KEY_FILE has to be specified");
+        .unwrap_or_else(|_| "/usr/local/thereiwas/private.key".to_string());
 
     let database_connection_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_connection_pool_manager = diesel::r2d2::ConnectionManager::new(&database_connection_url);
