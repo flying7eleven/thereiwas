@@ -10,9 +10,9 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::error;
 use rocket::http::Status;
 use rocket::serde::json::Json;
-use rocket::{get, post, Request, State};
+use rocket::{get, post, State};
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, SocketAddr};
+use std::net::IpAddr;
 
 pub mod guards;
 pub mod owntracks;
