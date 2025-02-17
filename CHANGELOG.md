@@ -6,6 +6,21 @@ All notable changes since the last release are documented here.
 
 Nothing so far
 
+## 2024.2.17 (backend-only)
+
+### Added
+- **(backend)** Prepare the container to mount the encryption keys ([501e743])
+- **(backend)** Add default paths for the private and public key ([fb79f35])
+
+### Changed
+- **(backend)** Upgrade the used dependencies ([aecdf19])
+- **(backend)** Remove unnecessary borrowing ([8663110])
+- **(backend)** Remove unused imports ([0711aa6])
+
+### Documentation
+- Fix version name in the changelog ([d82c945])
+
+
 ## 2025.2.14 (backend-only)
 
 ### Added
@@ -97,3 +112,9 @@ Nothing so far
 [76bdc94]: https://github.com/flying7eleven/thereiwas/commit/76bdc94
 [f718ca4]: https://github.com/flying7eleven/thereiwas/commit/f718ca4
 [b9e8a6d]: https://github.com/flying7eleven/thereiwas/commit/b9e8a6d
+[8663110]: https://github.com/flying7eleven/thereiwas/commit/8663110
+[0711aa6]: https://github.com/flying7eleven/thereiwas/commit/0711aa6
+[501e743]: https://github.com/flying7eleven/thereiwas/commit/501e743
+[aecdf19]: https://github.com/flying7eleven/thereiwas/commit/aecdf19
+[fb79f35]: https://github.com/flying7eleven/thereiwas/commit/fb79f35
+[d82c945]: https://github.com/flying7eleven/thereiwas/commit/d82c945

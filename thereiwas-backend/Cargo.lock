@@ -1525,7 +1525,7 @@ dependencies = [
 
 [[package]]
 name = "thereiwas"
-version = "2025.1.15"
+version = "2025.2.17"
 dependencies = [
  "bcrypt",
  "chrono",
