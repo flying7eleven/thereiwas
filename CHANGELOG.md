@@ -9,15 +9,15 @@ Nothing so far
 ## 2025.3.4 (backend-only)
 
 ### Added
-- **(backend)** Add a new column for a health check URL for clients ([c4c9306b])
-- **(backend)** Add support for the client health callback URLs ([1b111da0])
-- **(backend)** Add the `reqwest` library as a new dependency ([d24689e4])
+- **(backend)** Add a new column for a health check URL for clients ([c4c9306])
+- **(backend)** Add support for the client health callback URLs ([1b111da])
+- **(backend)** Add the `reqwest` library as a new dependency ([d24689e])
 
 ### Changed
-- **(backend)** Upgrade all used dependencies ([7a1f225f])
+- **(backend)** Upgrade all used dependencies ([7a1f225])
 
 ### Fixed
-- **(backend)** Fix the path to the Dockerfile for the backend ([c65ef8fc])
+- **(backend)** Fix the path to the Dockerfile for the backend ([c65ef8f])
 
 ## 2025.2.17 (backend-only)
 
