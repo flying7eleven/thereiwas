@@ -66,6 +66,7 @@ pub struct ClientToken {
     pub client: String,
     pub secret: String,
     pub description: Option<String>,
+    pub health_callback_url: Option<String>,
 }
 
 #[derive(Insertable)]

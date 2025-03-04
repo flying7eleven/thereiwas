@@ -1,0 +1,1 @@
+ALTER TABLE client_tokens DROP COLUMN health_callback_url;

@@ -4,11 +4,8 @@ diesel::table! {
     audit_log (id) {
         id -> Int4,
         request_time -> Timestamp,
-        #[max_length = 32]
         action -> Varchar,
-        #[max_length = 32]
         result -> Varchar,
-        #[max_length = 46]
         source -> Varchar,
     }
 }
@@ -16,12 +13,10 @@ diesel::table! {
 diesel::table! {
     client_tokens (id) {
         id -> Int4,
-        #[max_length = 36]
         client -> Varchar,
-        #[max_length = 10]
         secret -> Varchar,
-        #[max_length = 128]
         description -> Nullable<Varchar>,
+        health_callback_url -> Nullable<Varchar>,
     }
 }
 
@@ -32,7 +27,6 @@ diesel::table! {
         altitude -> Nullable<Int4>,
         latitude -> Float8,
         longitude -> Float8,
-        #[max_length = 1]
         report_trigger -> Varchar,
         measurement_time -> Timestamp,
         vertical_accuracy -> Nullable<Int4>,
@@ -53,7 +47,6 @@ diesel::table! {
 diesel::table! {
     permissions (id) {
         id -> Int4,
-        #[max_length = 32]
         name -> Varchar,
         description -> Text,
     }
@@ -62,7 +55,6 @@ diesel::table! {
 diesel::table! {
     roles (id) {
         id -> Int4,
-        #[max_length = 32]
         name -> Varchar,
         description -> Text,
     }
@@ -79,9 +71,7 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Int4,
-        #[max_length = 64]
         username -> Varchar,
-        #[max_length = 60]
         password_hash -> Varchar,
     }
 }
@@ -97,9 +87,7 @@ diesel::table! {
 diesel::table! {
     wifi_access_points (id) {
         id -> Int4,
-        #[max_length = 18]
         bssid -> Varchar,
-        #[max_length = 32]
         ssid -> Varchar,
         last_seen -> Nullable<Timestamp>,
     }

@@ -1,0 +1,1 @@
+ALTER TABLE client_tokens ADD health_callback_url VARCHAR(255) DEFAULT NULL;
