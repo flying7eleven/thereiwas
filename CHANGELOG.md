@@ -6,7 +6,20 @@ All notable changes since the last release are documented here.
 
 Nothing so far
 
-## 2024.2.17 (backend-only)
+## 2025.3.4 (backend-only)
+
+### Added
+- **(backend)** Add a new column for a health check URL for clients ([c4c9306b])
+- **(backend)** Add support for the client health callback URLs ([1b111da0])
+- **(backend)** Add the `reqwest` library as a new dependency ([d24689e4])
+
+### Changed
+- **(backend)** Upgrade all used dependencies ([7a1f225f])
+
+### Fixed
+- **(backend)** Fix the path to the Dockerfile for the backend ([c65ef8fc])
+
+## 2025.2.17 (backend-only)
 
 ### Added
 - **(backend)** Prepare the container to mount the encryption keys ([501e743])
@@ -118,3 +131,9 @@ Nothing so far
 [aecdf19]: https://github.com/flying7eleven/thereiwas/commit/aecdf19
 [fb79f35]: https://github.com/flying7eleven/thereiwas/commit/fb79f35
 [d82c945]: https://github.com/flying7eleven/thereiwas/commit/d82c945
+[c4c9306]: https://github.com/flying7eleven/thereiwas/commit/c4c9306
+[1b111da]: https://github.com/flying7eleven/thereiwas/commit/1b111da
+[d24689e]: https://github.com/flying7eleven/thereiwas/commit/d24689e
+[7a1f225]: https://github.com/flying7eleven/thereiwas/commit/7a1f225
+[c65ef8f]: https://github.com/flying7eleven/thereiwas/commit/c65ef8f
+
