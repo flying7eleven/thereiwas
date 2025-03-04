@@ -16,6 +16,7 @@ use diesel::result::Error::DatabaseError;
 use diesel::{BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use log::{debug, error, info, trace, warn};
 use r2d2::PooledConnection;
+use reqwest::blocking::Client;
 use rocket::http::Status;
 use rocket::{post, State};
 use serde::Deserialize;
@@ -452,7 +453,7 @@ fn handle_new_location_request(
 pub fn add_new_location_record(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
     raw_body: RawBody,
-    client: AuthenticatedClient,
+    authenticated_client: AuthenticatedClient,
 ) -> Status {
     let generic_request = match serde_json::from_slice::<GenericRequest>(&raw_body.0) {
         Ok(parsed) => parsed,
@@ -473,7 +474,9 @@ pub fn add_new_location_record(
     let mut db_connection = db_connection_pool.get().unwrap();
 
     let message_handling_result = match generic_request.message_type.as_str() {
-        "location" => handle_new_location_request(&raw_body, client.id, &mut db_connection),
+        "location" => {
+            handle_new_location_request(&raw_body, authenticated_client.id, &mut db_connection)
+        }
         "status" => handle_status_request(&raw_body),
         _ => {
             warn!(
@@ -483,6 +486,27 @@ pub fn add_new_location_record(
             return Status::BadRequest;
         }
     };
+
+    if message_handling_result.is_ok() && authenticated_client.health_callback_url.is_some() {
+        let client = Client::new();
+        match client
+            .get(&authenticated_client.health_callback_url.unwrap())
+            .send()
+        {
+            Ok(_) => {
+                debug!(
+                    "Successfully called health callback URL for client {}",
+                    authenticated_client.id
+                );
+            }
+            Err(error) => {
+                error!(
+                    "Could not call the health callback URL for client {}. The error was: {}",
+                    authenticated_client.id, error
+                );
+            }
+        }
+    }
 
     match message_handling_result {
         Ok(_) => Status::NoContent,

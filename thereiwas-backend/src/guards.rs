@@ -12,6 +12,7 @@ use std::net::{IpAddr, SocketAddr};
 
 pub struct AuthenticatedClient {
     pub id: i32,
+    pub health_callback_url: Option<String>,
 }
 
 #[derive(Debug)]
@@ -79,6 +80,7 @@ impl<'r> FromRequest<'r> for AuthenticatedClient {
                             );
                             return Outcome::Success(AuthenticatedClient {
                                 id: client_token.id,
+                                health_callback_url: client_token.health_callback_url.clone(),
                             });
                         }
                         warn!("Could not find a matching client_id and client_secret pair in the database");
