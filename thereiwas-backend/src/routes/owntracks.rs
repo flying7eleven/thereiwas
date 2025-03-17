@@ -174,16 +174,38 @@ impl Display for OwnTracksError {
 
 impl Error for OwnTracksError {}
 
-fn handle_status_request(raw_body: &RawBody) -> Result<(), OwnTracksError> {
-    let status_request = match serde_json::from_slice::<StatusRequest>(&raw_body.0) {
-        Ok(parsed) => parsed,
+fn parse_new_location_request(raw_json: &str) -> Result<NewLocationRequest, OwnTracksError> {
+    match serde_json::from_str::<NewLocationRequest>(raw_json) {
+        Ok(parsed) => Ok(parsed),
         Err(e) => {
-            let body_str = String::from_utf8_lossy(&raw_body.0);
             error!(
                 "Received unknown or invalid JSON received (error was {}): {}",
-                e, body_str
+                e, raw_json
             );
-            return Err(OwnTracksError::RequestBodyParsingError);
+            Err(OwnTracksError::RequestBodyParsingError)
+        }
+    }
+}
+
+fn parse_status_request(raw_json: &str) -> Result<StatusRequest, OwnTracksError> {
+    match serde_json::from_str::<StatusRequest>(raw_json) {
+        Ok(parsed) => Ok(parsed),
+        Err(e) => {
+            error!(
+                "Received unknown or invalid JSON received (error was {}): {}",
+                e, raw_json
+            );
+            Err(OwnTracksError::RequestBodyParsingError)
+        }
+    }
+}
+
+fn handle_status_request(raw_body: &RawBody) -> Result<(), OwnTracksError> {
+    let body_str = String::from_utf8_lossy(&raw_body.0);
+    let status_request = match parse_status_request(&body_str) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            return Err(e);
         }
     };
     trace!("Received a new status request");
@@ -361,19 +383,6 @@ fn fix_owntracks_bssid_error(received_bssid: &str) -> String {
         .join(":")
 }
 
-fn parse_new_location_request(raw_json: &str) -> Result<NewLocationRequest, OwnTracksError> {
-    match serde_json::from_str::<NewLocationRequest>(raw_json) {
-        Ok(parsed) => Ok(parsed),
-        Err(e) => {
-            error!(
-                "Received unknown or invalid JSON received (error was {}): {}",
-                e, raw_json
-            );
-            Err(OwnTracksError::RequestBodyParsingError)
-        }
-    }
-}
-
 fn handle_new_location_request(
     raw_body: &RawBody,
     reporting_device: i32,
@@ -532,7 +541,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_check_ssid_and_bssid_are_parsed_correctly() {
+    fn test_check_lowercase_ssid_and_bssid_are_parsed_correctly() {
         let input_text = r#"{"tid":"6C","batt":75,"lon":5.1234560000000000,"acc":6,"bs":1,"inrids":[],"p":102.283,"vac":3,"inregions":[],"lat":40.123456000000000,"topic":"owntracks\/user\/7CB9781C-BA94-4BB2-B2F8-CFA8E99BFB61","bssid":"de:ad:be:ef:00:00","t":"u","conn":"w","tst":1742196210,"m":2,"ssid":"some ssid","alt":35,"_type":"location"}"#;
         let parse_result = parse_new_location_request(&input_text);
 
