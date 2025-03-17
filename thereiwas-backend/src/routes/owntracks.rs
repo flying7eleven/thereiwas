@@ -528,3 +528,21 @@ pub fn add_new_location_record(
         },
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_check_ssid_and_bssid_are_parsed_correctly() {
+        let input_text = r#"{"tid":"6C","batt":75,"lon":5.1234560000000000,"acc":6,"bs":1,"inrids":[],"p":102.283,"vac":3,"inregions":[],"lat":40.123456000000000,"topic":"owntracks\/user\/7CB9781C-BA94-4BB2-B2F8-CFA8E99BFB61","bssid":"de:ad:be:ef:00:00","t":"u","conn":"w","tst":1742196210,"m":2,"ssid":"some ssid","alt":35,"_type":"location"}"#;
+        let parse_result = parse_new_location_request(&input_text);
+
+        assert_eq!(parse_result.is_ok(), true);
+        let unwrapped = parse_result.unwrap();
+        assert_eq!(unwrapped.bssid.is_some(), true);
+        assert_eq!(unwrapped.bssid.unwrap(), "de:ad:be:ef:00:00");
+        assert_eq!(unwrapped.ssid.is_some(), true);
+        assert_eq!(unwrapped.ssid.unwrap(), "some ssid");
+    }
+}
