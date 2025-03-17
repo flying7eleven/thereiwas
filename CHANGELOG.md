@@ -6,6 +6,15 @@ All notable changes since the last release are documented here.
 
 Nothing so far
 
+## 2025.3.17 (backend-only)
+
+### Added
+- **(backend)** Log out the whole received JSON in trace mode ([9bb23d8])
+
+### Changed
+- **(backend)** Upgrade all dependencies ([9f7db7c])
+- **(backend)** Reduce logging of the `reqwest` framework ([1ca7db1])
+
 ## 2025.3.4 (backend-only)
 
 ### Added
@@ -136,4 +145,6 @@ Nothing so far
 [d24689e]: https://github.com/flying7eleven/thereiwas/commit/d24689e
 [7a1f225]: https://github.com/flying7eleven/thereiwas/commit/7a1f225
 [c65ef8f]: https://github.com/flying7eleven/thereiwas/commit/c65ef8f
-
+[9bb23d8]: https://github.com/flying7eleven/thereiwas/commit/9bb23d8
+[9f7db7c]: https://github.com/flying7eleven/thereiwas/commit/9f7db7c
+[1ca7db1]: https://github.com/flying7eleven/thereiwas/commit/1ca7db1
