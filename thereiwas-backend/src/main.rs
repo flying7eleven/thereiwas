@@ -78,6 +78,7 @@ async fn setup_logging(logging_level: LevelFilter, logfile_path: &String) {
     base_config
         .chain(logging_target)
         .level_for("rocket", LevelFilter::Error)
+        .level_for("reqwest", LevelFilter::Error)
         .apply()
         .unwrap();
 }
