@@ -133,9 +133,7 @@ struct NewLocationRequest {
     pub tid: String,
     // #[serde(rename = "_type")]
     // pub message_type: String,
-    #[serde(alias = "BSSID")]
     pub bssid: Option<String>,
-    #[serde(alias = "SSID")]
     pub ssid: Option<String>,
     // pub conn: Option<String>,
     pub created_at: Option<i64>,
