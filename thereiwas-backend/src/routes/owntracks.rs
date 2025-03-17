@@ -363,20 +363,29 @@ fn fix_owntracks_bssid_error(received_bssid: &str) -> String {
         .join(":")
 }
 
+fn parse_new_location_request(raw_json: &str) -> Result<NewLocationRequest, OwnTracksError> {
+    match serde_json::from_str::<NewLocationRequest>(raw_json) {
+        Ok(parsed) => Ok(parsed),
+        Err(e) => {
+            error!(
+                "Received unknown or invalid JSON received (error was {}): {}",
+                e, raw_json
+            );
+            Err(OwnTracksError::RequestBodyParsingError)
+        }
+    }
+}
+
 fn handle_new_location_request(
     raw_body: &RawBody,
     reporting_device: i32,
     db_connection: &mut PooledConnection<ConnectionManager<PgConnection>>,
 ) -> Result<(), OwnTracksError> {
-    let location_request = match serde_json::from_slice::<NewLocationRequest>(&raw_body.0) {
+    let body_str = String::from_utf8_lossy(&raw_body.0);
+    let location_request = match parse_new_location_request(&body_str) {
         Ok(parsed) => parsed,
         Err(e) => {
-            let body_str = String::from_utf8_lossy(&raw_body.0);
-            error!(
-                "Received unknown or invalid JSON received (error was {}): {}",
-                e, body_str
-            );
-            return Err(OwnTracksError::RequestBodyParsingError);
+            return Err(e);
         }
     };
     trace!(
