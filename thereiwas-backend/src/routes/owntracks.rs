@@ -455,10 +455,11 @@ pub fn add_new_location_record(
     raw_body: RawBody,
     authenticated_client: AuthenticatedClient,
 ) -> Status {
+    let body_str = String::from_utf8_lossy(&raw_body.0);
+    trace!("Received following JSON: {}", body_str);
     let generic_request = match serde_json::from_slice::<GenericRequest>(&raw_body.0) {
         Ok(parsed) => parsed,
         Err(e) => {
-            let body_str = String::from_utf8_lossy(&raw_body.0);
             error!(
                 "The received request body can not be interpreted (error was {}): {}",
                 e, body_str
@@ -466,7 +467,7 @@ pub fn add_new_location_record(
             return Status::UnprocessableEntity;
         }
     };
-    trace!(
+    debug!(
         "Received OwnTracks request of type '{}'",
         generic_request.message_type
     );
