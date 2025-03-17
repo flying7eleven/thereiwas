@@ -1990,7 +1990,7 @@ dependencies = [
 
 [[package]]
 name = "thereiwas"
-version = "2025.3.4"
+version = "2025.3.17"
 dependencies = [
  "bcrypt",
  "chrono",
