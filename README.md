@@ -10,3 +10,15 @@ Inspired by services like Google Maps Timeline / Location History, this project 
 Ever wonder where you’ve been throughout the year?
 **There I Was** helps you answer that question by recording your coordinates in a simple, flexible, and private manner, all without relying on a closed, proprietary service.
 It’s a passion project that I find exciting — especially at the end of each year when I look back at my journey.
+
+## Development
+
+### Backend
+
+```shell
+cargo upgrade -i allow && cargo update
+```
+
+```shell
+git log backend-2025.3.4..HEAD --oneline
+```
