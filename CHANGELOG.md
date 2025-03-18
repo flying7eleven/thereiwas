@@ -6,6 +6,23 @@ All notable changes since the last release are documented here.
 
 Nothing so far
 
+## 2025.3.18 (backend-only)
+
+### Added
+- **(backend)** Add a test for parsing the (b)ssid ([7a68ddf])
+
+### Changed
+- **(backend)** Upgrade the used dependencies ([2080ee7])
+- **(backend)** Only support lower-case JSON attributes from OwnTracks ([dca6059])
+- **(backend)** Extract the method for parsing status requests ([2de5be2])
+- **(backend)** Extract a method for easier unit testing ([5d2a8b3])
+
+### Fixed
+- **(backend)** Ensure the (b)ssid properties are case-insensitive ([e94a55c])
+
+### Documentation
+- Add some information about the development ([7098f12])
+
 ## 2025.3.17 (backend-only)
 
 ### Added
@@ -148,3 +165,10 @@ Nothing so far
 [9bb23d8]: https://github.com/flying7eleven/thereiwas/commit/9bb23d8
 [9f7db7c]: https://github.com/flying7eleven/thereiwas/commit/9f7db7c
 [1ca7db1]: https://github.com/flying7eleven/thereiwas/commit/1ca7db1
+[2080ee7]: https://github.com/flying7eleven/thereiwas/commit/2080ee7
+[7098f12]: https://github.com/flying7eleven/thereiwas/commit/7098f12
+[2de5be2]: https://github.com/flying7eleven/thereiwas/commit/2de5be2
+[dca6059]: https://github.com/flying7eleven/thereiwas/commit/dca6059
+[e94a55c]: https://github.com/flying7eleven/thereiwas/commit/e94a55c
+[7a68ddf]: https://github.com/flying7eleven/thereiwas/commit/7a68ddf
+[5d2a8b3]: https://github.com/flying7eleven/thereiwas/commit/5d2a8b3
