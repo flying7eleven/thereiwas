@@ -17,12 +17,12 @@ default-features = false
 features = ["std"]
 
 [dependencies.chrono]
-version = "0.4.40"
+version = "0.4.41"
 default-features = false
 features = ["std"]
 
 [dependencies.diesel]
-version = "2.2.8"
+version = "2.2.11"
 default-features = false
 features = ["postgres", "r2d2", "chrono"]
 
@@ -48,7 +48,7 @@ version = "1.5.0"
 default-features = false
 
 [dependencies.log]
-version = "0.4.26"
+version = "0.4.27"
 default-features = false
 features = ["std"]
 
@@ -57,7 +57,7 @@ version = "0.8.10"
 default-features = false
 
 [dependencies.reqwest]
-version = "0.12.14"
+version = "0.12.20"
 default-features = false
 features = ["native-tls", "blocking"]
 
