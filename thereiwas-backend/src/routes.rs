@@ -1,7 +1,7 @@
 use crate::fairings::ThereIWasDatabaseConnection;
 use crate::models::{Location, User};
 use crate::schema::locations::dsl::locations;
-use crate::schema::locations::{created_at, measurement_time, reporting_device};
+use crate::schema::locations::{measurement_time, reporting_device};
 use crate::schema::users::dsl::users;
 use crate::schema::users::username;
 use crate::{
@@ -12,7 +12,7 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::error;
 use rocket::http::Status;
 use rocket::serde::json::Json;
-use rocket::{get, post, State};
+use rocket::{get, options, post, State};
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 
@@ -47,6 +47,11 @@ pub struct LocationRecord {
     pub vertical_accuracy: Option<i32>,
     pub altitude: Option<i32>,
     pub measurement_time: i32,
+}
+
+#[options("/positions")]
+pub fn get_positions_options() -> Status {
+    Status::Ok
 }
 
 #[get("/positions")]

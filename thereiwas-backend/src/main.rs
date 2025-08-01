@@ -14,9 +14,9 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 use std::time::Duration;
-use thereiwas::fairings::ThereIWasDatabaseConnection;
+use thereiwas::fairings::{ThereIWasDatabaseConnection, CORS};
 use thereiwas::routes::owntracks::add_new_location_record;
-use thereiwas::routes::{get_health_status, get_login_token, get_positions};
+use thereiwas::routes::{get_health_status, get_login_token, get_positions, get_positions_options};
 use thereiwas::{
     custom_handler_bad_request, custom_handler_conflict, custom_handler_forbidden,
     custom_handler_internal_server_error, custom_handler_not_found, custom_handler_unauthorized,
@@ -218,9 +218,11 @@ async fn main() {
     let _ = rocket::custom(rocket_configuration_figment)
         .manage(ThereIWasDatabaseConnection::from(db_connection_pool))
         .manage(backend_config)
+        .attach(CORS)
         .mount(
             "/v1",
             routes![
+                get_positions_options,
                 get_login_token,
                 get_health_status,
                 add_new_location_record,
