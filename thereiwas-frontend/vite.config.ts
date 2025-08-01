@@ -13,7 +13,7 @@ export default defineConfig(() => {
       sourcemap: false,
       target: browserslistToEsbuild([">0.2%", "not dead", "not op_mini all"]),
     },
-    assetsInclude: ["**/*.png"],
+    assetsInclude: ["**/*.png", "**/*.jpg"],
     plugins: [
       react({
         jsxImportSource: "@emotion/react",
