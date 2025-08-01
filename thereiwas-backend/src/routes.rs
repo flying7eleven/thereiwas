@@ -94,6 +94,11 @@ pub fn get_positions(
     Ok(Json(records))
 }
 
+#[options("/auth/token")]
+pub fn get_login_token_options() -> Status {
+    Status::Ok
+}
+
 #[post("/auth/token", data = "<login_information>")]
 pub fn get_login_token(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
