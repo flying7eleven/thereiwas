@@ -33,11 +33,11 @@ pub enum ReportTrigger {
     CircularRegionWithFollowRegions,
     /// Beacon region enter/leave event (iOS)
     BeaconRegion,
-    /// Response to a reportLocation cmd message (iOS,Android)
+    /// Response to a reportLocation cmd message (iOS, Android)
     ReportLocationResponse,
-    /// Manual publish requested by the user (iOS,Android)
+    /// Manually published requested by the user (iOS, Android)
     UserRequest,
-    /// Timer based publish in move (iOS)
+    /// Timer-based publish in move (iOS)
     TimerBased,
     /// Updated by Settings/Privacy/Locations Services/System Services/Frequent Locations monitoring (iOS)
     FrequentLocationsMonitoring,

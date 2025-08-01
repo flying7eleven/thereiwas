@@ -1,5 +1,7 @@
 use crate::fairings::ThereIWasDatabaseConnection;
-use crate::models::User;
+use crate::models::{Location, User};
+use crate::schema::locations::dsl::locations;
+use crate::schema::locations::{created_at, measurement_time, reporting_device};
 use crate::schema::users::dsl::users;
 use crate::schema::users::username;
 use crate::{
@@ -35,6 +37,54 @@ pub struct LoginInformation {
 pub struct TokenResponse {
     /// The access token to use for API requests.
     access_token: String,
+}
+
+#[derive(Serialize)]
+pub struct LocationRecord {
+    pub longitude: f64,
+    pub latitude: f64,
+    pub horizontal_accuracy: Option<i32>,
+    pub vertical_accuracy: Option<i32>,
+    pub altitude: Option<i32>,
+    pub measurement_time: i32,
+}
+
+#[get("/positions")]
+pub fn get_positions(
+    db_connection_pool: &State<ThereIWasDatabaseConnection>,
+) -> Result<Json<Vec<LocationRecord>>, Status> {
+    let mut db_connection = db_connection_pool
+        .get()
+        .map_err(|_| Status::ServiceUnavailable)?;
+
+    let location_records = db_connection
+        .build_transaction()
+        .read_only()
+        .run::<_, diesel::result::Error, _>(|connection| {
+            locations
+                .filter(reporting_device.eq(1)) // TODO: change this to a parameter
+                .order_by(measurement_time.desc())
+                .limit(100) // TODO: change this to a parameter
+                .load::<Location>(connection)
+        })
+        .map_err(|e| match e {
+            diesel::result::Error::NotFound => Status::NotFound,
+            _ => Status::InternalServerError,
+        })?;
+
+    let records = location_records
+        .into_iter()
+        .map(|loc| LocationRecord {
+            longitude: loc.longitude,
+            latitude: loc.latitude,
+            horizontal_accuracy: loc.horizontal_accuracy,
+            vertical_accuracy: loc.vertical_accuracy,
+            altitude: loc.altitude,
+            measurement_time: loc.measurement_time.and_utc().timestamp() as i32,
+        })
+        .collect();
+
+    Ok(Json(records))
 }
 
 #[post("/auth/token", data = "<login_information>")]

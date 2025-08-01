@@ -4,7 +4,7 @@ use crate::schema::{
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable, Selectable};
 
-#[derive(Queryable)]
+#[derive(Queryable, Selectable, Clone)]
 #[diesel(table_name = locations)]
 pub struct Location {
     pub id: i32,
