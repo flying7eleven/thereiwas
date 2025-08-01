@@ -6,6 +6,27 @@ All notable changes since the last release are documented here.
 
 Nothing so far
 
+## 2025.8.1
+
+### Added
+_ **(frontend)** Add a dashboard view for the found locations ([1b6b5b7])
+_ **(frontend)** Add the `leaflet` dependency for displaying maps ([1a64963])
+_ **(frontend)** Add `prettier` to the dev dependencies ([240436d])
+_ **(backend)** Add proper CORS header support ([f2170fb])
+_ **(backend)** Add an initial route for getting the locations ([8dd5584])
+
+### Changed
+- **(backend)** Upgrade the used dependencies ([f5e6441], [152de9e])
+- **(frontend)** Re-format the frontend code ([9602ad6])
+- **(backend)** Improve the release build size ([2f1bdde])
+
+### Fixed
+- **(backend)** Use the correct path for caching the target directory ([c26ba0a])
+- **(backend)** Use caching when building the backend ([edb33ed])
+
+### Security
+- **(backend)** Require authentication for the `/v1/position` route ([42cc73d])
+
 ## 2025.3.18 (backend-only)
 
 ### Added
@@ -172,3 +193,15 @@ Nothing so far
 [e94a55c]: https://github.com/flying7eleven/thereiwas/commit/e94a55c
 [7a68ddf]: https://github.com/flying7eleven/thereiwas/commit/7a68ddf
 [5d2a8b3]: https://github.com/flying7eleven/thereiwas/commit/5d2a8b3
+[1b6b5b7]: https://github.com/flying7eleven/thereiwas/commit/1b6b5b7
+[1a64963]: https://github.com/flying7eleven/thereiwas/commit/1a64963
+[240436d]: https://github.com/flying7eleven/thereiwas/commit/240436d
+[f2170fb]: https://github.com/flying7eleven/thereiwas/commit/f2170fb
+[8dd5584]: https://github.com/flying7eleven/thereiwas/commit/8dd5584
+[f5e6441]: https://github.com/flying7eleven/thereiwas/commit/f5e6441
+[152de9e]: https://github.com/flying7eleven/thereiwas/commit/152de9e
+[9602ad6]: https://github.com/flying7eleven/thereiwas/commit/9602ad6
+[2f1bdde]: https://github.com/flying7eleven/thereiwas/commit/2f1bdde
+[c26ba0a]: https://github.com/flying7eleven/thereiwas/commit/c26ba0a
+[edb33ed]: https://github.com/flying7eleven/thereiwas/commit/edb33ed
+[42cc73d]: https://github.com/flying7eleven/thereiwas/commit/42cc73d
