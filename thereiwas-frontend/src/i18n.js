@@ -24,6 +24,20 @@ i18n
               },
             },
           },
+          dashboard: {
+            navigation: {
+              app_title: "There I Was",
+              logout_button: "Logout",
+            },
+          },
+          global: {
+            navigation: {
+              dashboard: "Dashboard",
+              calendar: "Calendar",
+              settings: "Settings",
+              version: "Version",
+            },
+          },
         },
       },
     },

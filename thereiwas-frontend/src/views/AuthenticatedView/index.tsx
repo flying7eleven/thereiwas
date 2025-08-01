@@ -24,6 +24,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
 import InfoIcon from "@mui/icons-material/Info";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   content: ReactElement;
@@ -103,6 +104,7 @@ export const AuthenticatedView = (props: Props) => {
   const auth = useAuthentication();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const onClickOnDashboard = () => {
     navigate("/");
@@ -147,10 +149,10 @@ export const AuthenticatedView = (props: Props) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            dashboard.navigation.app_title
+            {t("dashboard.navigation.app_title")}
           </Typography>
           <Button color="inherit" onClick={logoutUser}>
-            dashboard.navigation.logout_button
+            {t("dashboard.navigation.logout_button")}
           </Button>
         </Toolbar>
       </AppBar>
@@ -171,7 +173,7 @@ export const AuthenticatedView = (props: Props) => {
               <ListItemIcon>
                 <DashboardIcon />
               </ListItemIcon>
-              <ListItemText primary="global.navigation.dashboard" />
+              <ListItemText primary={t("global.navigation.dashboard")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
@@ -183,7 +185,7 @@ export const AuthenticatedView = (props: Props) => {
               <ListItemIcon>
                 <CalendarTodayIcon />
               </ListItemIcon>
-              <ListItemText primary="global.navigation.calendar" />
+              <ListItemText primary={t("global.navigation.calendar")} />
             </ListItemButton>
           </ListItem>
           <Divider />
@@ -196,7 +198,7 @@ export const AuthenticatedView = (props: Props) => {
               <ListItemIcon>
                 <SettingsIcon />
               </ListItemIcon>
-              <ListItemText primary="global.navigation.settings" />
+              <ListItemText primary={t("global.navigation.settings")} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
@@ -208,7 +210,7 @@ export const AuthenticatedView = (props: Props) => {
               <ListItemIcon>
                 <InfoIcon />
               </ListItemIcon>
-              <ListItemText primary="global.navigation.version" />
+              <ListItemText primary={t("global.navigation.version")} />
             </ListItemButton>
           </ListItem>
         </List>
