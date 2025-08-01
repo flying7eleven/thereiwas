@@ -1,4 +1,5 @@
 use crate::fairings::ThereIWasDatabaseConnection;
+use crate::guards::AuthenticatedClient;
 use crate::models::{Location, User};
 use crate::schema::locations::dsl::locations;
 use crate::schema::locations::{measurement_time, reporting_device};
@@ -57,6 +58,7 @@ pub fn get_positions_options() -> Status {
 #[get("/positions")]
 pub fn get_positions(
     db_connection_pool: &State<ThereIWasDatabaseConnection>,
+    _authenticated_client: AuthenticatedClient,
 ) -> Result<Json<Vec<LocationRecord>>, Status> {
     let mut db_connection = db_connection_pool
         .get()
