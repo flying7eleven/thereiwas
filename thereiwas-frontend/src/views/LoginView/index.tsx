@@ -58,9 +58,9 @@ export const LoginView = (props: Props) => {
 
   const getCorrectImage = () => {
     if (props.isDark) {
-      return "public/background_login_dark.jpg";
+      return "images/background_login_dark.jpg";
     }
-    return "public/background_login_light.jpg";
+    return "images/background_login_light.jpg";
   };
 
   return (
