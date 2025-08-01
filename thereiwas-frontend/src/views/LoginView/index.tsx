@@ -81,10 +81,6 @@ export const LoginView = (props: Props) => {
       </Snackbar>
       <Grid container component="main" sx={{ height: "100vh" }}>
         <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
           sx={{
             backgroundImage: `url(${getCorrectImage()})`,
             backgroundRepeat: "no-repeat",
@@ -95,8 +91,20 @@ export const LoginView = (props: Props) => {
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
-        />
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+          size={{
+            xs: false,
+            sm: 4,
+            md: 7
+          }} />
+        <Grid
+          component={Paper}
+          elevation={6}
+          square
+          size={{
+            xs: 12,
+            sm: 8,
+            md: 5
+          }}>
           <Box
             sx={{
               my: 8,
