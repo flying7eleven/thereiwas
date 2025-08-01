@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthentication } from "../../hooks/useAuthentication";
 import { Alert, Snackbar } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   isDark: boolean;
@@ -27,6 +28,8 @@ export const LoginView = (props: Props) => {
   const passwordField = useRef<HTMLInputElement>(null);
 
   const [isSnackbarOpen, setIsSnackbarOpen] = useState<boolean>(false);
+
+  const { t } = useTranslation();
 
   const handleSnackbarClose = () => {
     setIsSnackbarOpen(false);
@@ -76,7 +79,7 @@ export const LoginView = (props: Props) => {
           severity="error"
           sx={{ width: "100%" }}
         >
-          login.alerts.failed_login.message
+          {t("login.alerts.failed_login.message")}
         </Alert>
       </Snackbar>
       <Grid container component="main" sx={{ height: "100vh" }}>
@@ -94,8 +97,9 @@ export const LoginView = (props: Props) => {
           size={{
             xs: false,
             sm: 4,
-            md: 7
-          }} />
+            md: 7,
+          }}
+        />
         <Grid
           component={Paper}
           elevation={6}
@@ -103,8 +107,9 @@ export const LoginView = (props: Props) => {
           size={{
             xs: 12,
             sm: 8,
-            md: 5
-          }}>
+            md: 5,
+          }}
+        >
           <Box
             sx={{
               my: 8,
@@ -118,7 +123,7 @@ export const LoginView = (props: Props) => {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              login.headlines.signin
+              {t("login.headlines.signin")}
             </Typography>
             <Box
               component="form"
@@ -131,7 +136,7 @@ export const LoginView = (props: Props) => {
                 required
                 fullWidth
                 id="username"
-                label="login.form.username_field_label"
+                label={t("login.form.username_field_label")}
                 name="username"
                 autoComplete="username"
                 autoFocus
@@ -142,7 +147,7 @@ export const LoginView = (props: Props) => {
                 required
                 fullWidth
                 name="password"
-                label="login.form.password_field_label"
+                label={t("login.form.password_field_label")}
                 type="password"
                 id="password"
                 autoComplete="current-password"
@@ -154,7 +159,7 @@ export const LoginView = (props: Props) => {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
               >
-                login.form.sign_in_button
+                {t("login.form.sign_in_button")}
               </Button>
             </Box>
           </Box>
