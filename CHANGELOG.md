@@ -9,11 +9,11 @@ Nothing so far
 ## 2025.8.1
 
 ### Added
-_ **(frontend)** Add a dashboard view for the found locations ([1b6b5b7])
-_ **(frontend)** Add the `leaflet` dependency for displaying maps ([1a64963])
-_ **(frontend)** Add `prettier` to the dev dependencies ([240436d])
-_ **(backend)** Add proper CORS header support ([f2170fb])
-_ **(backend)** Add an initial route for getting the locations ([8dd5584])
+- **(frontend)** Add a dashboard view for the found locations ([1b6b5b7])
+- **(frontend)** Add the `leaflet` dependency for displaying maps ([1a64963])
+- **(frontend)** Add `prettier` to the dev dependencies ([240436d])
+- **(backend)** Add proper CORS header support ([f2170fb])
+- **(backend)** Add an initial route for getting the locations ([8dd5584])
 
 ### Changed
 - **(backend)** Upgrade the used dependencies ([f5e6441], [152de9e])
